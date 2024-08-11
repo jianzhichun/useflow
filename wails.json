@@ -1,8 +1,8 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "motion-capture-ui",
+  "name": "motion-capture-web",
   "outputfilename": "motion-capture-ui",
-  "frontend:install": "npm install",
+  "frontend:install": "pnpm install",
   "frontend:build": "npm run build",
   "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
