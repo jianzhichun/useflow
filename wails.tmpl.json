@@ -2,8 +2,10 @@
   "$schema": "https://wails.io/schemas/config.v2.json",
   "name": "motion-capture-web",
   "outputfilename": "motion-capture-ui",
-  "frontend:dev:serverUrl": "http://localhost:3002",
-  "wailsjsdir": "frontend/wailsjs",
+  "frontend:install": "pnpm install",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
   "author": {
     "name": "Rivery",
     "email": "572189105@qq.com"
