@@ -35,15 +35,15 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: true,
-  // async redirects() {
-  //   return [
-  //     {
-  //       source: '/',
-  //       destination: '/workflow',
-  //       permanent: false,
-  //     },
-  //   ]
-  // },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/workflow',
+        permanent: false,
+      },
+    ]
+  },
   output: 'standalone',
 }
 

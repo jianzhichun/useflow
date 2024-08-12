@@ -1,16 +1,12 @@
-'use client'
+"use client";
 
-import Link from "next/link"
+import Workflow from "@/app/components/workflow";
 
 const Page = () => {
   return (
-    <div className='w-full h-full overflow-x-auto'>
-      <div className="w-full">
-        <Link href='/'>back</Link>
-      </div>
-      hello world
-      {/* <Workflow /> */}
+    <div className="w-full h-full overflow-x-auto">
+      <Workflow />
     </div>
-  )
-}
-export default Page
+  );
+};
+export default Page;
