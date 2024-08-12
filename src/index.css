@@ -1,0 +1,22 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+.react-flow__panel.react-flow__attribution.bottom.right {
+  display: none;
+}
+:where(.css-dev-only-do-not-override-d2lrxs).ant-form-item {
+  margin-bottom: 0px;
+}
+.context-menu {
+  position: absolute;
+  z-index: 1000;
+}
