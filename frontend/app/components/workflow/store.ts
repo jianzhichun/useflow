@@ -18,11 +18,17 @@ type PreviewRunningData = WorkflowRunningData & {
 }
 
 type Shape = {
+  panelMenu?: {
+    top: number
+    left: number
+  }
+  setPanelMenu: (panelMenu: Shape['panelMenu']) => void
 }
 
 export const createWorkflowStore = () => {
   return createStore<Shape>(set => ({
-    
+    panelMenu: undefined,
+    setPanelMenu: panelMenu => set(() => ({ panelMenu })),
   }))
 }
 

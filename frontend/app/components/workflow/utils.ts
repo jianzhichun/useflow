@@ -194,3 +194,18 @@ export const getLayoutByDagre = (originNodes: Node[], originEdges: Edge[]) => {
 
   return dagreGraph
 }
+
+export const isMac = () => {
+  return navigator.userAgent.toUpperCase().includes('MAC')
+}
+
+const specialKeysNameMap: Record<string, string | undefined> = {
+  ctrl: '⌘',
+  alt: '⌥',
+}
+
+export const getKeyboardKeyNameBySystem = (key: string) => {
+  if (isMac())
+    return specialKeysNameMap[key] || key
+  return key
+}

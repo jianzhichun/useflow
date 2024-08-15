@@ -12,7 +12,7 @@ import 'reactflow/dist/style.css'
 import './style.css'
 import type { Edge, Node } from "./types";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useWorkflowInit, useNodesInteractions } from "./hooks";
+import { useWorkflowInit, useNodesInteractions, usePanelInteractions } from "./hooks";
 import { initialEdges, initialNodes } from "./utils";
 import Loading from "@/app/components/base/loading";
 import { WorkflowHistoryProvider } from "./workflow-history-store";
@@ -20,6 +20,7 @@ import { WorkflowContextProvider } from "./context";
 import { CUSTOM_NODE } from "./constants";
 import CustomNode from "./nodes";
 import CustomEdge from "./custom-edge";
+import PanelContextmenu from "./panel-contextmenu";
 
 type WorkflowProps = {
   nodes: Node[];
@@ -54,6 +55,11 @@ const Workflow: FC<WorkflowProps> = memo(
       handleNodeContextMenu,
     } = useNodesInteractions()
 
+    const {
+      handlePaneContextMenu,
+      // handlePaneContextmenuCancel,
+    } = usePanelInteractions()
+
     return (
       <div
         id="workflow-container"
@@ -62,6 +68,7 @@ const Workflow: FC<WorkflowProps> = memo(
       `}
         ref={workflowContainerRef}
       >
+        <PanelContextmenu />
         <ReactFlow
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
@@ -77,6 +84,15 @@ const Workflow: FC<WorkflowProps> = memo(
           onConnect={handleNodeConnect}
           onConnectStart={handleNodeConnectStart}
           onConnectEnd={handleNodeConnectEnd}
+          // onEdgeMouseEnter={handleEdgeEnter}
+          // onEdgeMouseLeave={handleEdgeLeave}
+          // onEdgesChange={handleEdgesChange}
+          // onSelectionStart={handleSelectionStart}
+          // onSelectionChange={handleSelectionChange}
+          // onSelectionDrag={handleSelectionDrag}
+          onPaneContextMenu={handlePaneContextMenu}
+          // connectionLineComponent={CustomConnectionLine}
+          // connectionLineContainerStyle={{ zIndex: ITERATION_CHILDREN_Z_INDEX }}
           defaultViewport={viewport}
           multiSelectionKeyCode={null}
           deleteKeyCode={null}
