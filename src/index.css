@@ -20,3 +20,6 @@ body,
   position: absolute;
   z-index: 1000;
 }
+:where(.css-dev-only-do-not-override-d2lrxs).ant-collapse>.ant-collapse-item >.ant-collapse-header >.ant-collapse-header-text {
+  flex: unset;
+}

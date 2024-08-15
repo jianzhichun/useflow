@@ -5,7 +5,7 @@ import { Select, Form, Switch } from 'antd';
 import { UseHandle } from './components/UseHandle';
 
 export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
-  const minWidth = 200, minHeight = 50;
+  const minWidth = 200;
   const [width, setWidth] = useState(minWidth);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -63,7 +63,6 @@ export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
         draw();
         const stream = canvas.captureStream();
         data["stream"] = stream;
-        updateNodeInternals(id);
 
         return () => {
           if (stream) {
@@ -75,8 +74,8 @@ export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
   }, [data.selectedDeviceId, data.isMirrored]);
 
   return (
-    <div className="react-flow__node-default" style={{ minWidth, minHeight, width: "100%", height: "100%", padding: "0px" }}>
-      <NodeResizer minWidth={minWidth} minHeight={minHeight} isVisible={selected || false} onResizeEnd={(_, { width }: ResizeParams) => { setWidth(width) }} />
+    <div className="react-flow__node-default" style={{ minWidth, width: "100%", height: "100%", padding: "0px" }}>
+      <NodeResizer minWidth={minWidth} isVisible={selected || false} onResizeEnd={(_, { width }: ResizeParams) => { setWidth(width) }} />
       <div>摄像头输入</div>
       <UseHandle output={[{ id: "stream", label: "视频流" }]}></UseHandle>
       <Form size="small" colon style={{ width }} initialValues={data} onValuesChange={(_, values) => {
@@ -91,7 +90,7 @@ export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
         </Form.Item>
       </Form>
       <video ref={videoRef} autoPlay style={{ display: 'none' }} />
-      <canvas ref={canvasRef} style={{ width: `${width}px`, height: "auto" }} />
+      <canvas ref={canvasRef} style={{ width, height: "auto" }} />
     </div>
   );
 
