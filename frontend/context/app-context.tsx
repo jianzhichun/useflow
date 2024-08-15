@@ -8,11 +8,13 @@ import { Theme } from '@/types/app'
 export type AppContextValue = {
   theme: Theme
   setTheme: (theme: Theme) => void
+  pageContainerRef: React.RefObject<HTMLDivElement>
 }
 
 const AppContext = createContext<AppContextValue>({
   theme: Theme.light,
   setTheme: () => { },
+  pageContainerRef: createRef(),
 })
 
 export function useSelector<T>(selector: (value: AppContextValue) => T): T {
@@ -41,6 +43,7 @@ export const AppContextProvider: FC<AppContextProviderProps> = ({ children }) =>
     <AppContext.Provider value={{
       theme,
       setTheme: handleSetTheme,
+      pageContainerRef
     }}>
       <div className='flex flex-col h-full overflow-y-auto'>
         <div ref={pageContainerRef} className='grow relative flex flex-col overflow-y-auto overflow-x-hidden bg-background-body'>

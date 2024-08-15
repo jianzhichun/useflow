@@ -22,6 +22,7 @@ type Shape = {
 
 export const createWorkflowStore = () => {
   return createStore<Shape>(set => ({
+    
   }))
 }
 

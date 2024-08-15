@@ -39,7 +39,7 @@ const nextConfig = {
     return [
       {
         source: '/',
-        destination: '/workflow',
+        destination: '/app/123/workflow',
         permanent: false,
       },
     ]

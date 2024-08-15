@@ -3,12 +3,14 @@ import type { FC } from "react";
 import ReactFlow, {
   Background,
   ReactFlowProvider,
+  SelectionMode,
   useEdgesState,
   useNodesState,
   type Viewport,
 } from "reactflow";
+import 'reactflow/dist/style.css'
+import './style.css'
 import type { Edge, Node } from "./types";
-
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWorkflowInit, useNodesInteractions } from "./hooks";
 import { initialEdges, initialNodes } from "./utils";
@@ -78,6 +80,17 @@ const Workflow: FC<WorkflowProps> = memo(
           defaultViewport={viewport}
           multiSelectionKeyCode={null}
           deleteKeyCode={null}
+          nodesDraggable
+          nodesConnectable
+          nodesFocusable
+          edgesFocusable
+          panOnDrag
+          zoomOnPinch
+          zoomOnScroll
+          zoomOnDoubleClick
+          selectionKeyCode={null}
+          selectionMode={SelectionMode.Partial}
+          selectionOnDrag
           minZoom={0.25}
         >
           <Background gap={[14, 14]} size={2} color="#E4E5E7" />
