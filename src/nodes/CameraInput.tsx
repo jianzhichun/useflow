@@ -3,6 +3,7 @@ import { type CameraInput } from './types';
 import { useEffect, useRef, useState } from 'react';
 import { Select, Form, Switch } from 'antd';
 import { UseHandle } from './components/UseHandle';
+import { useRuntimeNodeDataStore } from '../App';
 
 export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
   const minWidth = 200;
@@ -11,6 +12,7 @@ export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const updateNodeInternals = useUpdateNodeInternals();
+  const setRuntimeNodeData = useRuntimeNodeDataStore((state: any) => (nodeData: any) => state.setNodeData(id, nodeData));
   useEffect(() => {
     async function getDevices() {
       const deviceInfos = await navigator.mediaDevices.enumerateDevices();
@@ -62,7 +64,7 @@ export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
 
         draw();
         const stream = canvas.captureStream();
-        data["stream"] = stream;
+        setRuntimeNodeData({ stream });
 
         return () => {
           if (stream) {

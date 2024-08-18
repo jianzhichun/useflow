@@ -9,8 +9,7 @@ import {
   useEdgesState,
   type OnConnect,
   useReactFlow,
-  Panel,
-  useUpdateNodeInternals
+  Panel
 } from '@xyflow/react';
 import { Button, Flex } from 'antd';
 import '@xyflow/react/dist/style.css';
@@ -18,6 +17,40 @@ import { nanoid } from 'nanoid';
 import { initialNodes, nodeTypes } from './nodes';
 import { initialEdges, edgeTypes } from './edges';
 import ContextMenu from './ContextMenu';
+import { create } from 'zustand';
+
+export const useRuntimeNodeDataStore = create((set) => {
+  return {
+    nodeDatas: {},
+    edgeKV: {},
+    getInputParam(id: any, key: any) {
+      const state = this as any;
+      if (state.edgeKV[`${id}---${key}`]) {
+        const [id_, key_] = state.edgeKV[`${id}---${key}`].split('---');
+        if (!state.nodeDatas?.[id_]?.[key_]) {
+          return state.getInputParam(id_, key_);
+        }
+        return state.nodeDatas[id_][key_];
+      }
+    },
+    setEdgeKV(source: string, target: string) {
+      return set((state: any) => ({
+        edgeKV: {
+          ...state.edgeKV,
+          [source]: target
+        }
+      }));
+    },
+    setNodeData(id: string, nodeData: any) {
+      return set((state: any) => ({
+        nodeDatas: {
+          ...state.nodeDatas,
+          [id]: { ...state.nodeDatas[id], ...nodeData }
+        }
+      }));
+    }
+  };
+});
 
 export default function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -26,24 +59,19 @@ export default function App() {
   const [rfInstance, setRfInstance] = useState<any>(null);
   const { screenToFlowPosition } = useReactFlow();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const updateNodeInternals = useUpdateNodeInternals();
+  const setEdgeKV = useRuntimeNodeDataStore((state: any) => state.setEdgeKV);
+
   useEffect(() => {
     edges.forEach(connection => {
-      const sourceNode = nodes.find(node => node.id === connection.source);
-      const targetNode = nodes.find(node => node.id === connection.target);
-      if (targetNode && sourceNode && connection.targetHandle && connection.sourceHandle) {
-        targetNode.data[connection.targetHandle] = sourceNode.data[connection.sourceHandle];
-        updateNodeInternals(connection.target);
+      if (connection.targetHandle && connection.sourceHandle) {
+        setEdgeKV(`${connection.target}---${connection.targetHandle}`, `${connection.source}---${connection.sourceHandle}`);
       }
     });
   }, [nodes, edges]);
   const onConnect: OnConnect = useCallback((connection) => {
     setEdges((edges) => addEdge(connection, edges));
-    const sourceNode = nodes.find(node => node.id === connection.source);
-    const targetNode = nodes.find(node => node.id === connection.target);
-    if (targetNode && sourceNode && connection.targetHandle && connection.sourceHandle) {
-      targetNode.data[connection.targetHandle] = sourceNode.data[connection.sourceHandle];
-      updateNodeInternals(connection.target);
+    if (connection.targetHandle && connection.sourceHandle) {
+      setEdgeKV(`${connection.target}---${connection.targetHandle}`, `${connection.source}---${connection.sourceHandle}`);
     }
   }, [nodes]);
   const onContextMenu = useCallback((event: any) => {

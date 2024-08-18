@@ -24,9 +24,11 @@
     "antd": "^5.20.0",
     "lodash": "^4.17.21",
     "lodash.clamp": "^4.0.3",
+    "nanoid": "^5.0.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "three": "^0.167.1"
+    "three": "^0.167.1",
+    "zustand": "^4.5.5"
   },
   "license": "MIT",
   "devDependencies": {

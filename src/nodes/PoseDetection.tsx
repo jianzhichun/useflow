@@ -2,6 +2,7 @@ import { NodeProps, NodeResizer, ResizeParams } from '@xyflow/react';
 import { type PoseDetection } from './types';
 import { useEffect, useRef, useState } from 'react';
 import { UseHandle } from './components/UseHandle';
+import { useRuntimeNodeDataStore } from '../App';
 
 import '@tensorflow/tfjs-backend-webgl';
 import '@tensorflow/tfjs-backend-webgpu';
@@ -14,18 +15,20 @@ import { Collapse } from 'antd';
 
 tfjsWasm.setWasmPaths('./pose-detection-lib/');
 
-export function PoseDetection({ id, selected, data }: NodeProps<PoseDetection>) {
+export function PoseDetection({ id, selected }: NodeProps<PoseDetection>) {
     const minWidth = 200;
     const [width, setWidth] = useState(minWidth);
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const inputStream = useRuntimeNodeDataStore((state: any) => state.getInputParam(id, "stream"));
+    const setRuntimeNodeData = useRuntimeNodeDataStore((state: any) => (nodeData: any) => state.setNodeData(id, nodeData));
 
     useEffect(() => {
-        if (data.stream && videoRef.current && canvasRef.current) {
+        if (inputStream && videoRef.current && canvasRef.current) {
             const video = videoRef.current as HTMLVideoElement;
             const canvas = canvasRef.current as HTMLCanvasElement;
             const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-            video.srcObject = data.stream;
+            video.srcObject = inputStream;
             video.onloadedmetadata = () => {
                 video.play();
                 const drawKeypoint = (keypoint: any) => {
@@ -85,7 +88,7 @@ export function PoseDetection({ id, selected, data }: NodeProps<PoseDetection>) 
                     const poses = await detector.estimatePoses(videoRef.current, { maxPoses: 1, flipHorizontal: false });
                     ctx?.drawImage(video, 0, 0);
                     if (poses?.length > 0) {
-                        data["poses"] = poses;
+                        setRuntimeNodeData({ poses });
                         for (const pose of poses) {
                             if (pose.keypoints != null) {
                                 drawKeypoints(pose.keypoints);
@@ -106,14 +109,14 @@ export function PoseDetection({ id, selected, data }: NodeProps<PoseDetection>) 
                 };
                 loadModelAndDetectPose();
                 const stream = canvas.captureStream();
-                data["skstream"] = stream;
+                setRuntimeNodeData({ skstream: stream });
             };
             return () => {
                 const tracks = (video.srcObject as MediaStream).getTracks();
                 tracks.forEach(track => track.stop());
             };
         }
-    }, [data.stream]);
+    }, [inputStream]);
     return (
         <div className="react-flow__node-default" style={{ width: "100%", height: "100%", padding: "0px" }}>
             <NodeResizer minWidth={minWidth} isVisible={selected || false} onResizeEnd={(_, { width }: ResizeParams) => { setWidth(width) }} />
