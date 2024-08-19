@@ -7,7 +7,7 @@ import { createStore } from 'zustand/vanilla'
 // import type { Viewport } from 'reactflow'
 import type {
   // Edge,
-  // Node,
+  Node,
   WorkflowRunningData,
 } from './types'
 import { WorkflowContext } from './context'
@@ -22,13 +22,17 @@ type Shape = {
     top: number
     left: number
   }
-  setPanelMenu: (panelMenu: Shape['panelMenu']) => void
+  setPanelMenu: (panelMenu: Shape['panelMenu']) => void;
+  candidateNode?: Node
+  setCandidateNode: (candidateNode?: Node) => void
 }
 
 export const createWorkflowStore = () => {
   return createStore<Shape>(set => ({
     panelMenu: undefined,
     setPanelMenu: panelMenu => set(() => ({ panelMenu })),
+    candidateNode: undefined,
+    setCandidateNode: candidateNode => set(() => ({ candidateNode })),
   }))
 }
 

@@ -12,9 +12,9 @@ import {
   usePanelInteractions,
   // useWorkflowStartRun,
 } from './hooks'
-// import AddBlock from './operator/add-block'
+import AddBlock from './operator/add-block'
 // import { useOperator } from './operator/hooks'
-import cn from '@/utils/classnames'
+// import cn from '@/utils/classnames'
 
 const PanelContextmenu = () => {
   const { t } = useTranslation()
@@ -55,14 +55,14 @@ const PanelContextmenu = () => {
       ref={ref}
     >
       <div className='p-1'>
-        {/* <AddBlock
+        <AddBlock
           renderTrigger={renderTrigger}
           offset={{
             mainAxis: -36,
             crossAxis: -4,
           }}
-        /> */}
-        <div
+        />
+        {/* <div
           className='flex items-center justify-between px-3 h-8 text-sm text-gray-700 rounded-lg cursor-pointer hover:bg-gray-50'
           onClick={(e) => {
             e.stopPropagation()
@@ -70,8 +70,8 @@ const PanelContextmenu = () => {
             handlePaneContextmenuCancel()
           }}
         >
-          {t('workflow.nodes.note.addNote')}
-        </div>
+          {t('workflow.common.addBlock')}
+        </div> */}
         <div
           className='flex items-center justify-between px-3 h-8 text-sm text-gray-700 rounded-lg cursor-pointer hover:bg-gray-50'
           onClick={() => {

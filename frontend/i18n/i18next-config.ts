@@ -7,6 +7,7 @@ import { LanguagesSupported } from '@/i18n/language'
 const loadLangResources = (lang: string) => ({
   translation: {
     app: require(`./${lang}/app`).default,
+    workflow: require(`./${lang}/workflow`).default,
   },
 })
 

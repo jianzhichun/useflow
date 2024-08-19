@@ -209,3 +209,16 @@ export const getKeyboardKeyNameBySystem = (key: string) => {
     return specialKeysNameMap[key] || key
   return key
 }
+
+export const generateNewNode = ({ data, position, id, zIndex, type, ...rest }: Omit<Node, 'id'> & { id?: string }) => {
+  return {
+    id: id || `${Date.now()}`,
+    type: type || CUSTOM_NODE,
+    data,
+    position,
+    targetPosition: Position.Left,
+    sourcePosition: Position.Right,
+    zIndex: zIndex || 0,
+    ...rest,
+  } as Node
+}

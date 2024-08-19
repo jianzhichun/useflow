@@ -7,7 +7,7 @@ import type {
 export enum BlockEnum {
   Start = 'start',
   End = 'end',
-  VideoInput = 'video_input',
+  VideoInput = 'video-input',
 }
 
 export enum NodeRunningStatus {
@@ -17,6 +17,8 @@ export enum NodeRunningStatus {
   Succeeded = 'succeeded',
   Failed = 'failed',
 }
+
+export type OnSelectBlock = (type: BlockEnum, toolDefaultValue?: ToolDefaultValue) => void
 
 export type ToolDefaultValue = {
   provider_id: string
@@ -30,6 +32,36 @@ export type ToolDefaultValue = {
 export type Branch = {
   id: string
   name: string
+}
+
+export enum InputVarType {
+  textInput = 'text-input',
+  paragraph = 'paragraph',
+  select = 'select',
+  number = 'number',
+  url = 'url',
+  files = 'files',
+  json = 'json', // obj, array
+  contexts = 'contexts', // knowledge retrieval
+  iterator = 'iterator', // iteration input
+}
+
+export type ValueSelector = string[] // [nodeId, key | obj key path]
+
+export type InputVar = {
+  type: InputVarType
+  label: string | {
+    nodeType: BlockEnum
+    nodeName: string
+    variable: string
+  }
+  variable: string
+  max_length?: number
+  default?: string
+  required: boolean
+  hint?: string
+  options?: string[]
+  value_selector?: ValueSelector
 }
 
 export type CommonNodeType<T = {}> = {
@@ -70,6 +102,20 @@ export type CommonEdgeType = {
   targetType: BlockEnum
 }
 
+export type Block = {
+  classification?: string
+  type: BlockEnum
+  title: string
+  description?: string
+}
+
+export type NodeDefault<T> = {
+  defaultValue: Partial<T>
+  getAvailablePrevNodes: (isChatMode: boolean) => BlockEnum[]
+  getAvailableNextNodes: (isChatMode: boolean) => BlockEnum[]
+  checkValid: (payload: T, t: any, moreDataForCheckValid?: any) => { isValid: boolean; errorMessage?: string }
+}
+
 export type Node<T = {}> = ReactFlowNode<CommonNodeType<T>>
 
 export type Edge = ReactFlowEdge<CommonEdgeType>
@@ -99,4 +145,24 @@ export type WorkflowRunningData = {
     showSteps?: boolean
     total_steps?: number
   }
+}
+
+export enum VarType {
+  variable = 'variable',
+  constant = 'constant',
+  mixed = 'mixed',
+}
+
+export type Variable = {
+  variable: string
+  label?: string | {
+    nodeType: BlockEnum
+    nodeName: string
+    variable: string
+  }
+  variable_type?: VarType
+  value?: string
+  options?: string[]
+  required?: boolean
+  isParagraph?: boolean
 }

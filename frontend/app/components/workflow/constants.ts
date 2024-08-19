@@ -1,4 +1,45 @@
+import StartNodeDefault from './nodes/start/default'
+import EndNodeDefault from './nodes/end/default'
 import { BlockEnum } from "./types"
+
+type NodesExtraData = {
+  author: string
+  about: string
+  availablePrevNodes: BlockEnum[]
+  availableNextNodes: BlockEnum[]
+  getAvailablePrevNodes: (isChatMode: boolean) => BlockEnum[]
+  getAvailableNextNodes: (isChatMode: boolean) => BlockEnum[]
+  checkValid: any
+}
+export const NODES_EXTRA_DATA: Record<BlockEnum, NodesExtraData> = {
+  [BlockEnum.Start]: {
+    author: 'Official',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: StartNodeDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: StartNodeDefault.getAvailableNextNodes,
+    checkValid: StartNodeDefault.checkValid,
+  },
+  [BlockEnum.VideoInput]: {
+    author: 'Official',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: EndNodeDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: EndNodeDefault.getAvailableNextNodes,
+    checkValid: EndNodeDefault.checkValid,
+  },
+  [BlockEnum.End]: {
+    author: 'Official',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: EndNodeDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: EndNodeDefault.getAvailableNextNodes,
+    checkValid: EndNodeDefault.checkValid,
+  },
+}
 
 export const CUSTOM_NODE = 'custom'
 
@@ -21,9 +62,18 @@ export const ITERATION_PADDING = {
   left: 16,
 }
 
-export const NODES_INITIAL_DATA = {
+export const NODES_INITIAL_DATA: Record<BlockEnum, {
+  type: BlockEnum
+  title: string
+  desc: string
+}> = {
   [BlockEnum.Start]: {
     type: BlockEnum.Start,
+    title: '',
+    desc: '',
+  },
+  [BlockEnum.VideoInput]: {
+    type: BlockEnum.VideoInput,
     title: '',
     desc: '',
   },
