@@ -9,9 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.4.0",
     "@mediapipe/pose": "^0.5.1675469404",
-    "@react-three/drei": "^9.109.5",
-    "@react-three/fiber": "^8.17.5",
     "@tensorflow-models/pose-detection": "^2.1.3",
     "@tensorflow/tfjs-backend-cpu": "^4.20.0",
     "@tensorflow/tfjs-backend-wasm": "^4.20.0",
@@ -19,15 +18,14 @@
     "@tensorflow/tfjs-backend-webgpu": "^4.20.0",
     "@tensorflow/tfjs-converter": "^4.20.0",
     "@tensorflow/tfjs-core": "^4.20.0",
-    "@types/three": "^0.167.1",
+    "@uidotdev/usehooks": "^2.4.1",
     "@xyflow/react": "^12.0.3",
+    "ahooks": "^3.8.1",
     "antd": "^5.20.0",
-    "lodash": "^4.17.21",
     "lodash.clamp": "^4.0.3",
     "nanoid": "^5.0.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "three": "^0.167.1",
     "zustand": "^4.5.5"
   },
   "license": "MIT",

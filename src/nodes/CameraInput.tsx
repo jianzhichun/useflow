@@ -2,8 +2,9 @@ import { NodeProps, useUpdateNodeInternals, NodeResizer, ResizeParams } from '@x
 import { type CameraInput } from './types';
 import { useEffect, useRef, useState } from 'react';
 import { Select, Form, Switch } from 'antd';
-import { UseHandle } from './components/UseHandle';
+import UseHandle from '../components/UseHandle';
 import { useRuntimeNodeDataStore } from '../App';
+import EditableTitle from '../components/EditableTitle';
 
 export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
   const minWidth = 200;
@@ -78,12 +79,15 @@ export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
   return (
     <div className="react-flow__node-default" style={{ minWidth, width: "100%", height: "100%", padding: "0px" }}>
       <NodeResizer minWidth={minWidth} isVisible={selected || false} onResizeEnd={(_, { width }: ResizeParams) => { setWidth(width) }} />
-      <div>摄像头输入</div>
+      <EditableTitle title={data.label} onChange={(title) => { Object.assign(data, { label: title }) }}></EditableTitle>
       <UseHandle output={[{ id: "stream", label: "视频流" }]}></UseHandle>
-      <Form size="small" colon style={{ width }} initialValues={data} onValuesChange={(_, values) => {
-        Object.assign(data, values);
-        updateNodeInternals(id);
-      }} >
+      <Form size="small" colon style={{ width }}
+        initialValues={data}
+        onValuesChange={(_, values) => {
+          Object.assign(data, values);
+          updateNodeInternals(id);
+        }}
+      >
         <Form.Item label="设备" name="selectedDeviceId" >
           <Select className="nodrag nopan" options={devices.map(({ label, deviceId }) => ({ label, value: deviceId }))} />
         </Form.Item>

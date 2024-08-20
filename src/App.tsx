@@ -21,16 +21,15 @@ import { create } from 'zustand';
 
 export const useRuntimeNodeDataStore = create((set) => {
   return {
-    nodeDatas: {},
     edgeKV: {},
     getInputParam(id: any, key: any) {
       const state = this as any;
       if (state.edgeKV[`${id}---${key}`]) {
         const [id_, key_] = state.edgeKV[`${id}---${key}`].split('---');
-        if (!state.nodeDatas?.[id_]?.[key_]) {
+        if (!state[id_]?.[key_]) {
           return state.getInputParam(id_, key_);
         }
-        return state.nodeDatas[id_][key_];
+        return state[id_][key_];
       }
     },
     setEdgeKV(source: string, target: string) {
@@ -43,10 +42,7 @@ export const useRuntimeNodeDataStore = create((set) => {
     },
     setNodeData(id: string, nodeData: any) {
       return set((state: any) => ({
-        nodeDatas: {
-          ...state.nodeDatas,
-          [id]: { ...state.nodeDatas[id], ...nodeData }
-        }
+        [id]: { ...state[id], ...nodeData }
       }));
     }
   };
@@ -86,18 +82,16 @@ export default function App() {
     }
   }, []);
 
-  const onAddNode = useCallback((type: string) => {
+  const onAddNode = useCallback(({ key: type, data }: any) => {
     if (menuPosition) {
       const newNode = {
-        id: nanoid(),
-        type,
+        id: nanoid(), type, data,
         position: screenToFlowPosition({
           x: menuPosition.x,
           y: menuPosition.y,
-        }),
-        data: { label: `${type} node` },
+        })
       };
-      setNodes((nds) => nds.concat(newNode as any));
+      setNodes((nds) => nds.concat(newNode));
       setMenuPosition(null);
     }
   }, [menuPosition, screenToFlowPosition]);

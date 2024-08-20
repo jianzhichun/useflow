@@ -1,7 +1,7 @@
 import type { Node, BuiltInNode } from '@xyflow/react';
 
-export type CameraInput = Node<any, '摄像头输入'>;
-export type PoseDetection = Node<any, '姿势识别'>;
-export type PoseEditor = Node<any, '姿势编辑'>;
+export type CameraInput = Node<any, 'camera-input'>;
+export type PoseDetection = Node<any, 'pose-detection'>;
+export type PoseValidator = Node<any, 'pose-validator'>;
 
 export type AppNode = BuiltInNode | CameraInput;

@@ -13,7 +13,7 @@ export function InputHandle({ label, id, onConnect }: any) {
     </div>;
 }
 
-export function UseHandle({ input, output }: any) {
+export default function({ input, output }: any) {
     return (
         <div style={{ display: "flex", justifyContent: "space-between" }}>
             <div>
