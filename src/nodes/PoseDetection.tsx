@@ -2,7 +2,7 @@ import { NodeProps, NodeResizer, ResizeParams } from '@xyflow/react';
 import { type PoseDetection } from './types';
 import { useEffect, useRef, useState } from 'react';
 import UseHandle from '../components/UseHandle';
-import { useRuntimeNodeDataStore } from '../App';
+import { useRuntimeNodeStore } from '../App';
 
 import '@tensorflow/tfjs-backend-webgl';
 import '@mediapipe/pose';
@@ -72,8 +72,8 @@ export function PoseDetection({ id, selected, data }: NodeProps<PoseDetection>) 
     const [width, setWidth] = useState(minWidth);
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const inputStream = useRuntimeNodeDataStore((state: any) => state.getInputParam(id, "stream"));
-    const setRuntimeNodeData = useRuntimeNodeDataStore((state: any) => (nodeData: any) => state.setNodeData(id, nodeData));
+    const inputStream = useRuntimeNodeStore((state: any) => state.get(id, "stream"));
+    const setRuntimeNodeData = useRuntimeNodeStore(state => (nodeData: any) => state.set(id, nodeData));
 
     useEffect(() => {
         if (inputStream && videoRef.current && canvasRef.current) {

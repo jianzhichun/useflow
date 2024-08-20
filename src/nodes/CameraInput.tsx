@@ -3,7 +3,7 @@ import { type CameraInput } from './types';
 import { useEffect, useRef, useState } from 'react';
 import { Select, Form, Switch } from 'antd';
 import UseHandle from '../components/UseHandle';
-import { useRuntimeNodeDataStore } from '../App';
+import { useRuntimeNodeStore } from '../App';
 import EditableTitle from '../components/EditableTitle';
 
 export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
@@ -13,7 +13,7 @@ export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const updateNodeInternals = useUpdateNodeInternals();
-  const setRuntimeNodeData = useRuntimeNodeDataStore((state: any) => (nodeData: any) => state.setNodeData(id, nodeData));
+  const setRuntimeNodeData = useRuntimeNodeStore(state => (nodeData: any) => state.set(id, nodeData));
   useEffect(() => {
     async function getDevices() {
       const deviceInfos = await navigator.mediaDevices.enumerateDevices();
