@@ -10,8 +10,8 @@ import * as tfjsWasm from '@tensorflow/tfjs-backend-wasm';
 import * as tf from '@tensorflow/tfjs-core';
 import * as posedetection from '@tensorflow-models/pose-detection';
 
-import { Button, Flex, Image } from 'antd';
 import EditableTitle from '../components/EditableTitle';
+import Instructions from '../components/Instructions';
 
 tfjsWasm.setWasmPaths('node_modules/@tensorflow/tfjs-backend-wasm/wasm-out/');
 
@@ -134,7 +134,7 @@ export function PoseDetection({ id, selected, data }: NodeProps<PoseDetection>) 
         <div className="react-flow__node-default" style={{ width: "100%", height: "100%", padding: "0px" }}>
             <NodeResizer minWidth={minWidth} isVisible={selected || false} onResizeEnd={(_, { width }: ResizeParams) => { setWidth(width) }} />
             <EditableTitle title={data.label} onChange={(title) => { Object.assign(data, { label: title }) }}></EditableTitle>
-            <Instructions width={width} />
+            <Instructions style={{width}} />
             <UseHandle
                 input={[{ id: "stream", label: "视频流" }]}
                 output={[
