@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useEffect } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import {
   ReactFlow,
   Background,
@@ -22,24 +22,37 @@ import { create } from 'zustand';
 
 interface RuntimeNodeState {
   [id: string]: { [K: string]: any },
-  get: (id: string, key: string) => any,
+  get: (id: string, key?: string) => any,
   set: (id: string, nodeData: { [K: string]: any }) => void
 }
 
 export const useRuntimeNodeStore = create<RuntimeNodeState>((setState, getState, store) => {
   return {
-    get(id: string, key: string) {
+    get(id: string, key?: string) {
       const { getEdges } = useReactFlow();
       const edges = getEdges();
       const state = getState();
-      let id_ = id, key_ = key;
-      for (
-        let edge = edges.find(({ target, targetHandle }) => target === id_ && targetHandle === key_);
-        edge?.sourceHandle;
-        id_ = edge.source, key_ = edge.sourceHandle,
-        edge = edges.find(({ target, targetHandle }) => target === id_ && targetHandle === key_)
-      ) { }
-      return state?.[id_]?.[key_];
+      const getOne = (id: string, key: string) => {
+        let id_ = id, key_ = key;
+        for (
+          let edge = edges.find(({ target, targetHandle }) => target === id_ && targetHandle === key_);
+          edge?.sourceHandle;
+          id_ = edge.source, key_ = edge.sourceHandle,
+          edge = edges.find(({ target, targetHandle }) => target === id_ && targetHandle === key_)
+        ) { }
+        return state?.[id_]?.[key_];
+      }
+
+      if (!key) {
+        return edges.filter(({ target }) => target === id).reduce((params, edge) => {
+          if (edge.targetHandle) {
+            return { ...params, [edge.targetHandle]: getOne(id, edge.targetHandle) };
+          } else {
+            return params;
+          }
+        }, {});
+      }
+      return getOne(id, key);
     },
     set(id: string, nodeData: { [K: string]: any }) {
       setState(state => ({ [id]: { ...state[id], ...nodeData } }));

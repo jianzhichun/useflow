@@ -10,7 +10,7 @@ import * as tfjsWasm from '@tensorflow/tfjs-backend-wasm';
 import * as tf from '@tensorflow/tfjs-core';
 import * as posedetection from '@tensorflow-models/pose-detection';
 
-import { Collapse } from 'antd';
+import { Button, Flex, Image } from 'antd';
 import EditableTitle from '../components/EditableTitle';
 
 tfjsWasm.setWasmPaths('node_modules/@tensorflow/tfjs-backend-wasm/wasm-out/');
@@ -66,6 +66,15 @@ export const drawSkeleton = (ctx: CanvasRenderingContext2D, keypoints: any, opti
             ctx.stroke();
         }
     });
+}
+function Instructions({ width }: any) {
+    const [visible, setVisible] = useState(false);
+    return <Flex vertical align='start'>
+        <Button style={{padding:'0 4px'}} onClick={() => setVisible(old => !old)} size="small" type="link">
+            说明书
+        </Button>
+        {visible && <Image width={width} src="./pose-detection-lib/blazepose.png" />}
+    </Flex>
 }
 export function PoseDetection({ id, selected, data }: NodeProps<PoseDetection>) {
     const minWidth = 200;
@@ -133,9 +142,7 @@ export function PoseDetection({ id, selected, data }: NodeProps<PoseDetection>) 
         <div className="react-flow__node-default" style={{ width: "100%", height: "100%", padding: "0px" }}>
             <NodeResizer minWidth={minWidth} isVisible={selected || false} onResizeEnd={(_, { width }: ResizeParams) => { setWidth(width) }} />
             <EditableTitle title={data.label} onChange={(title) => { Object.assign(data, { label: title }) }}></EditableTitle>
-            <Collapse size="small" ghost
-                items={[{ label: '备忘录', children: <img width={width} src='./pose-detection-lib/blazepose.png'></img> }]}>
-            </Collapse>
+            <Instructions width={width} />
             <UseHandle
                 input={[{ id: "stream", label: "视频流" }]}
                 output={[

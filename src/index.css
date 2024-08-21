@@ -15,10 +15,6 @@ body,
   text-align: left;
 }
 
-.ant-collapse-header-text {
-  flex: unset !important;
-}
-
 .react-flow__node-input,
 .react-flow__node-default,
 .react-flow__node-output,

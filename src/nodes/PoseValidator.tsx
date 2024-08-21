@@ -575,7 +575,6 @@ function Score({ nodeId, scoreAlgorithm }: any) {
             weightsValue.push(weight);
         });
         let score = algorithmFun(A, B, normalizeWeights(weightsValue));
-        setOutputScore.run(score);
         const fn = scoreAlgorithm.scalingFunction.find(({ range: [min, max] }: any) => score >= min && score < max);
         if (fn) {
             const { algorithm, a, b, c } = fn;
@@ -594,6 +593,7 @@ function Score({ nodeId, scoreAlgorithm }: any) {
                     score = a * score + b;
             }
         }
+        setOutputScore.run(score);
         return score.toFixed(1);
     }
     return <></>;
@@ -609,8 +609,7 @@ export function PoseValidator({ id, selected, data }: NodeProps<PoseValidator>) 
             setDetector(await posedetection.createDetector(posedetection.SupportedModels.BlazePose, {
                 runtime: 'mediapipe',
                 modelType: 'full',
-                solutionPath: 'node_modules/@mediapipe/pose',
-                enableSegmentation: true
+                solutionPath: 'node_modules/@mediapipe/pose'
             }));
         }
         if (!detector) {

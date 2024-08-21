@@ -4,7 +4,7 @@ import { CameraInput } from './CameraInput';
 import { PoseDetection } from './PoseDetection';
 import { AppNode } from './types';
 import { PoseValidator } from './PoseValidator';
-import { Render } from './Render';
+import { PoseArrangement } from './PoseArrangement';
 
 export const initialNodes: AppNode[] = [];
 
@@ -42,10 +42,17 @@ export const nodeTypes = {
       }
     }
   }),
-  'render': Object.assign(Render, {
+  'pose-arrangement': Object.assign(PoseArrangement, {
     defaultData() {
       return {
-        label: '渲染',
+        label: '姿势编排',
+        frames: [{
+          wait: 3,
+          name: '姿势1',
+          minScore: 85,
+          rollback: 0,
+          scoreFormat: 'percentage'
+        }]
       }
     }
   })
