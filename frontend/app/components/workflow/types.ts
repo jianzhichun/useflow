@@ -124,6 +124,12 @@ export type SelectedNode = Pick<Node, 'id' | 'data'>
 
 export type NodeProps<T = unknown> = { id: string; data: CommonNodeType<T> }
 
+export type WorkflowDataUpdator = {
+  nodes: Node[]
+  edges: Edge[]
+  viewport: Viewport
+}
+
 export type WorkflowRunningData = {
   task_id?: string
   message_id?: string

@@ -26,17 +26,12 @@ const Blocks = ({
   availableBlocksTypes = [],
 }: BlocksProps) => {
   const { t } = useTranslation()
-  // const isChatMode = useIsChatMode()
-  const isChatMode = false
   const nodesExtraData = useNodesExtraData()
   const blocks = useBlocks()
 
   const groups = useMemo(() => {
     return BLOCK_CLASSIFICATIONS.reduce((acc, classification) => {
       const list = groupBy(blocks, 'classification')[classification].filter((block) => {
-        // if (block.type === BlockEnum.Answer && !isChatMode)
-        //   return false
-
         return block.title.toLowerCase().includes(searchText.toLowerCase()) && availableBlocksTypes.includes(block.type)
       })
 
@@ -45,12 +40,12 @@ const Blocks = ({
         [classification]: list,
       }
     }, {} as Record<string, typeof blocks>)
-  }, [blocks, isChatMode, searchText, availableBlocksTypes])
+  }, [blocks, searchText, availableBlocksTypes])
   const isEmpty = Object.values(groups).every(list => !list.length)
 
   const renderGroup = useCallback((classification: string) => {
     const list = groups[classification]
-
+    debugger;
     return (
       <div
         key={classification}

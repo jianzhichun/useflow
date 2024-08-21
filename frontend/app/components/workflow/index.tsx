@@ -6,21 +6,29 @@ import ReactFlow, {
   SelectionMode,
   useEdgesState,
   useNodesState,
+  useReactFlow,
   type Viewport,
 } from "reactflow";
-import 'reactflow/dist/style.css'
-import './style.css'
+import "reactflow/dist/style.css";
+import "./style.css";
 import type { Edge, Node } from "./types";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useWorkflowInit, useNodesInteractions, usePanelInteractions } from "./hooks";
+import {
+  useWorkflowInit,
+  useNodesInteractions,
+  usePanelInteractions,
+} from "./hooks";
 import { initialEdges, initialNodes } from "./utils";
 import Loading from "@/app/components/base/loading";
 import { WorkflowHistoryProvider } from "./workflow-history-store";
 import { WorkflowContextProvider } from "./context";
-import { CUSTOM_NODE } from "./constants";
+import { CUSTOM_NODE, WORKFLOW_DATA_UPDATE } from "./constants";
 import CustomNode from "./nodes";
 import CustomEdge from "./custom-edge";
 import PanelContextmenu from "./panel-contextmenu";
+import { useEventEmitterContextContext } from "@/context/event-emitter";
+import Panel from "./panel";
+import { useWorkflowUpdate } from "./hooks/use-workflow-interactions";
 
 type WorkflowProps = {
   nodes: Node[];
@@ -41,6 +49,19 @@ const Workflow: FC<WorkflowProps> = memo(
     const workflowContainerRef = useRef<HTMLDivElement>(null);
     const [nodes, setNodes] = useNodesState(originalNodes);
     const [edges, setEdges] = useEdgesState(originalEdges);
+    const reactflow = useReactFlow();
+    const { eventEmitter } = useEventEmitterContextContext();
+
+    eventEmitter?.useSubscription((v: any) => {
+      if (v.type === WORKFLOW_DATA_UPDATE) {
+        setNodes(v.payload.nodes);
+        setEdges(v.payload.edges);
+
+        if (v.payload.viewport) {
+          reactflow.setViewport(v.payload.viewport);
+        }
+      }
+    });
 
     const {
       handleNodeDragStart,
@@ -53,12 +74,12 @@ const Workflow: FC<WorkflowProps> = memo(
       handleNodeConnectStart,
       handleNodeConnectEnd,
       handleNodeContextMenu,
-    } = useNodesInteractions()
+    } = useNodesInteractions();
 
     const {
       handlePaneContextMenu,
       // handlePaneContextmenuCancel,
-    } = usePanelInteractions()
+    } = usePanelInteractions();
 
     return (
       <div
@@ -68,6 +89,7 @@ const Workflow: FC<WorkflowProps> = memo(
       `}
         ref={workflowContainerRef}
       >
+        {/* <Panel /> */}
         <PanelContextmenu />
         <ReactFlow
           nodeTypes={nodeTypes}

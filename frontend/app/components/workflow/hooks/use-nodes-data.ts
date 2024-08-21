@@ -20,15 +20,14 @@ export const useNodesInitialData = () => {
 
 export const useNodesExtraData = () => {
   const { t } = useTranslation()
-  const isChatMode = false
 
   return useMemo(() => produce(NODES_EXTRA_DATA, (draft) => {
     Object.keys(draft).forEach((key) => {
       draft[key as BlockEnum].about = t(`workflow.blocksAbout.${key}`)
-      draft[key as BlockEnum].availablePrevNodes = draft[key as BlockEnum].getAvailablePrevNodes(isChatMode)
-      draft[key as BlockEnum].availableNextNodes = draft[key as BlockEnum].getAvailableNextNodes(isChatMode)
+      draft[key as BlockEnum].availablePrevNodes = draft[key as BlockEnum].getAvailablePrevNodes(false)
+      draft[key as BlockEnum].availableNextNodes = draft[key as BlockEnum].getAvailableNextNodes(false)
     })
-  }), [t, isChatMode])
+  }), [t])
 }
 
 export const useAvailableBlocks = (nodeType?: BlockEnum, isInIteration?: boolean) => {

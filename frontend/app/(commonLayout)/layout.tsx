@@ -1,5 +1,6 @@
 import React from "react";
 import type { ReactNode } from "react";
+import { EventEmitterContextProvider } from "@/context/event-emitter";
 import SwrInitor from "@/app/components/swr-initor";
 import { AppContextProvider } from "@/context/app-context";
 import HeaderWrapper from "@/app/components/header/header-wrapper";
@@ -10,10 +11,12 @@ const Layout = ({ children }: { children: ReactNode }) => {
     <>
       <SwrInitor>
         <AppContextProvider>
-          <HeaderWrapper>
-            <Header />
-          </HeaderWrapper>
-          {children}
+          <EventEmitterContextProvider>
+            <HeaderWrapper>
+              <Header />
+            </HeaderWrapper>
+            {children}
+          </EventEmitterContextProvider>
         </AppContextProvider>
       </SwrInitor>
     </>

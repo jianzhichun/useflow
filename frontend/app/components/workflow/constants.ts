@@ -83,3 +83,8 @@ export const NODES_INITIAL_DATA: Record<BlockEnum, {
     desc: '',
   },
 }
+
+export const ALL_AVAILABLE_BLOCKS = Object.keys(NODES_EXTRA_DATA).filter(key => key !== BlockEnum.End && key !== BlockEnum.Start) as BlockEnum[]
+
+export const WORKFLOW_DATA_UPDATE = 'WORKFLOW_DATA_UPDATE'
+export const DSL_EXPORT_CHECK = 'DSL_EXPORT_CHECK'
