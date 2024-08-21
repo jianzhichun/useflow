@@ -6,7 +6,7 @@ import { useForm } from "antd/es/form/Form";
 import { Button, Flex, Form, Input, InputNumber, Select, Space } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import EditableTitle from "../components/EditableTitle";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function PoseFrame({ nodeId, idx, restField, remove, frames }: any) {
     const [configVisible, setConfigVisible] = useState(false);
@@ -49,7 +49,11 @@ export function PoseFrame({ nodeId, idx, restField, remove, frames }: any) {
 export function PoseArrangement({ id, selected, data }: NodeProps<PoseArrangement>) {
     const [form] = useForm();
     const updateNodeInternals = useUpdateNodeInternals();
-    const params = useRuntimeNodeStore((state) => state.get(id));
+    const params = useRuntimeNodeStore<{ [key: string]: any }>((state) => state.get(id));
+    const [currFrame, setCurrentFrame] = useState(0);
+    useEffect(() => {
+
+    }, [params, currFrame]);
     return (
         <div className="react-flow__node-default" style={{ width: "100%", height: "100%", padding: "0px" }}>
             <EditableTitle title={data.label} onChange={(title) => { Object.assign(data, { label: title }) }}></EditableTitle>

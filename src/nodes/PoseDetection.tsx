@@ -67,15 +67,7 @@ export const drawSkeleton = (ctx: CanvasRenderingContext2D, keypoints: any, opti
         }
     });
 }
-function Instructions({ width }: any) {
-    const [visible, setVisible] = useState(false);
-    return <Flex vertical align='start'>
-        <Button style={{padding:'0 4px'}} onClick={() => setVisible(old => !old)} size="small" type="link">
-            说明书
-        </Button>
-        {visible && <Image width={width} src="./pose-detection-lib/blazepose.png" />}
-    </Flex>
-}
+
 export function PoseDetection({ id, selected, data }: NodeProps<PoseDetection>) {
     const minWidth = 200;
     const [width, setWidth] = useState(minWidth);
