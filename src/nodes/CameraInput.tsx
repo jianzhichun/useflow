@@ -14,7 +14,6 @@ export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
   const tf = useTfjs();
   useEffect(() => {
     async function getDevices() {
-      await navigator.mediaDevices.getUserMedia({ video: true });
       const deviceInfos = await navigator.mediaDevices.enumerateDevices();
       const videoDevices = deviceInfos.filter((device) => device.kind === 'videoinput');
       setDevices(videoDevices);
