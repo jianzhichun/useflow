@@ -1,0 +1,7 @@
+.markdown {
+    width: inherit;
+    overflow: scroll;
+}
+.markdown p {
+    overflow-wrap: anywhere;
+}

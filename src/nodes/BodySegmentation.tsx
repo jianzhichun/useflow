@@ -4,40 +4,39 @@ import { useEffect } from 'react';
 import UseHandle from '../components/UseHandle';
 import { useRuntimeNodeStore } from '../App';
 import Instructions from '../components/Instructions';
-import { usePoseDetector } from '../components/PoseDetector';
 import { isEqual } from 'lodash';
 import ResizableNode from '../components/ResizableNode';
 import { Form, Select } from 'antd';
 import { useForm } from 'antd/es/form/Form';
-import { SupportedModels } from '@tensorflow-models/pose-detection';
+import { useBodySegmenter } from '../components/BodySegmenter';
+import { SupportedModels } from '@tensorflow-models/body-segmentation';
+import { useTfjs } from '../components/Tfjs';
 
-export function PoseDetection({ id, selected, data }: NodeProps<PoseDetection>) {
+export function BodySegmentation({ id, selected, data }: NodeProps<PoseDetection>) {
     const setRuntimeNodeData = useRuntimeNodeStore(state => (nodeData: any) => state.set(id, nodeData));
     const [form] = useForm();
+    const tf = useTfjs();
     const updateNodeInternals = useUpdateNodeInternals();
-    const detector = usePoseDetector(SupportedModels.BlazePose, {
+    const bodySegmenter = useBodySegmenter(SupportedModels.MediaPipeSelfieSegmentation, {
         runtime: 'mediapipe',
         modelType: data.modelType,
-        solutionPath: 'node_modules/@mediapipe/pose'
+        solutionPath: 'node_modules/@mediapipe/selfie_segmentation'
     });
     useEffect(() => {
-        if (detector) {
+        if (tf && bodySegmenter) {
             return useRuntimeNodeStore.subscribe(state => state.get(id, "tensor"), tensor => {
                 if (tensor) {
-                    detector.estimatePoses(tensor).then(poses => {
-                        if (poses.length > 0) {
-                            for (const pose of poses) {
-                                if (pose.keypoints != null) {
-                                    setRuntimeNodeData({ pose });
-                                    break;
-                                }
-                            }
-                        }
+                    bodySegmenter.segmentPeople(tensor, { multiSegmentation: true, flipHorizontal: false }).then((segmentations) => {
+                        segmentations.forEach(segmentation => segmentation.mask.toTensor().then((mask) => {
+                            const binaryMask = tf.greater(tf.mean(mask, 2), tf.scalar(0.5));
+                            const tensorWithoutBG = tf.mul(tensor, tf.expandDims(binaryMask, -1));
+                            setRuntimeNodeData({ mask, tensorWithoutBG });
+                        }));
                     });
                 }
             }, { equalityFn: isEqual });
         }
-    }, [detector]);
+    }, [tf, bodySegmenter]);
     return (
         <ResizableNode data={data} selected={selected}>
             {(width) => <>
@@ -45,7 +44,8 @@ export function PoseDetection({ id, selected, data }: NodeProps<PoseDetection>) 
                 <UseHandle
                     input={[{ id: "tensor", label: "视频流" }]}
                     output={[
-                        { id: "pose", label: '姿态数据' }
+                        { id: "mask", label: '分割掩码' },
+                        { id: "tensorWithoutBG", label: '无背景视频流' }
                     ]}
                 />
                 <Form
@@ -61,9 +61,8 @@ export function PoseDetection({ id, selected, data }: NodeProps<PoseDetection>) 
                 >
                     <Form.Item label="模型类型" name="modelType" >
                         <Select allowClear className="nodrag nopan" options={[
-                            { label: '高精度', value: 'heavy' },
-                            { label: '全精度', value: 'full' },
-                            { label: '精简', value: 'lite' },
+                            { label: 'general', value: 'general' },
+                            { label: 'landscape', value: 'landscape' },
                         ]} />
                     </Form.Item>
                 </Form>

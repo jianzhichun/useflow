@@ -1,0 +1,23 @@
+@keyframes flashingBorder {
+    0% {
+        border-color: transparent;
+        border-width: 2px;
+    }
+
+    50% {
+        border-color: green;
+        border-width: 2px;
+    }
+
+    100% {
+        border-color: transparent;
+        border-width: 2px;
+    }
+}
+
+.flashing-border {
+    padding: 3px;
+    border-style: solid;
+    border-color: transparent;
+    animation: flashingBorder 1s infinite;
+}

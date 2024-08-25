@@ -4,10 +4,14 @@ import { CameraInput } from './CameraInput';
 import { PoseDetection } from './PoseDetection';
 import { AppNode } from './types';
 import { PoseValidator } from './PoseValidator';
-import { PoseArrangement } from './PoseArrangement';
+import { ActionArrangement } from './ActionArrangement';
+import { Log } from './Log';
+import { VideoRender } from './VideoRender';
+import { BodySegmentation } from './BodySegmentation';
+import { HandPoseDetection } from './HandPoseDetection';
+import { HandPoseValidator } from './HandPoseValidator';
 
 export const initialNodes: AppNode[] = [];
-
 export const nodeTypes = {
   'camera-input': Object.assign(CameraInput, {
     defaultData() {
@@ -16,10 +20,19 @@ export const nodeTypes = {
       }
     }
   }),
+  'body-segmentation': Object.assign(BodySegmentation, {
+    defaultData() {
+      return {
+        label: '人像分割',
+        modelType: "general"
+      }
+    }
+  }),
   'pose-detection': Object.assign(PoseDetection, {
     defaultData() {
       return {
         label: '姿势识别',
+        modelType: "lite"
       }
     }
   }),
@@ -27,7 +40,8 @@ export const nodeTypes = {
     defaultData() {
       return {
         label: '姿势校验',
-        poseThreshold: 0.97,
+        poseCaptureThreshold: 0.6,
+        poseScoreThreshold: 0.7,
         scoreAlgorithm: {
           algorithm: 'manhattan',
           scalingFunction: [
@@ -42,17 +56,65 @@ export const nodeTypes = {
       }
     }
   }),
-  'pose-arrangement': Object.assign(PoseArrangement, {
+  'hand-pose-detection': Object.assign(HandPoseDetection, {
     defaultData() {
       return {
-        label: '姿势编排',
+        label: '手势识别',
+        modelType: "lite"
+      }
+    }
+  }),
+  'hand-pose-validator': Object.assign(HandPoseValidator, {
+    defaultData() {
+      return {
+        label: '手势校验',
+        poseCaptureThreshold: 0.6,
+        poseScoreThreshold: 0.7,
+        scoreAlgorithm: {
+          algorithm: 'manhattan',
+          scalingFunction: [
+            {
+              algorithm: 'linear',
+              range: [0, 1],
+              a: 100,
+              b: 0
+            }
+          ]
+        }
+      }
+    }
+  }),
+  'action-arrangement': Object.assign(ActionArrangement, {
+    defaultData() {
+      return {
+        label: '行为编排',
         frames: [{
           wait: 3,
-          name: '姿势1',
+          waitStrategy: 'condition_next',
+          name: '行为1',
           minScore: 85,
           rollback: 0,
           scoreFormat: 'percentage'
         }]
+      }
+    }
+  }),
+  'video-render': Object.assign(VideoRender, {
+    defaultData() {
+      return {
+        label: '视频渲染',
+        drawActions: [{
+          type: 'pose',
+          drawKeypoints: true,
+          drawSkeleton: true
+        }]
+      }
+    }
+  }),
+  'log': Object.assign(Log, {
+    defaultData() {
+      return {
+        label: '日志',
       }
     }
   })

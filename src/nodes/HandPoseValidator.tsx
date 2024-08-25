@@ -4,7 +4,7 @@ import { useRuntimeNodeStore } from '../App';
 import { useEffect, useRef, useState } from 'react';
 import { Upload, Image as AntdImage, Form, Slider, Select, Popover, Space, Button, Flex, InputNumber, message } from 'antd';
 import { LineChartOutlined, MinusCircleOutlined, PlusOutlined, UnorderedListOutlined, UploadOutlined } from '@ant-design/icons';
-import { drawKeypoints, drawSkeleton, usePoseDetector } from '../components/PoseDetector';
+import { drawKeypoints, useHandPoseDetector } from '../components/HandPoseDetector';
 import type { DefaultOptionType } from 'antd/es/select';
 import Markdown from '../components/Markdown';
 
@@ -12,12 +12,10 @@ import * as posedetection from '@tensorflow-models/pose-detection';
 import ResizableNode from '../components/ResizableNode';
 import { useDeepCompareEffect } from 'ahooks';
 import UseHandle from '../components/UseHandle';
+import { Hand, Keypoint } from '@tensorflow-models/hand-pose-detection';
 
 
-function calculate3DAngle(a: posedetection.Keypoint, b: posedetection.Keypoint, c: posedetection.Keypoint, poseScoreThreshold: number): number {
-    if ((a.score && a.score < poseScoreThreshold) || (b.score && b.score < poseScoreThreshold) || (c.score && c.score < poseScoreThreshold)) {
-        return Infinity;
-    }
+function calculate3DAngle(a: posedetection.Keypoint, b: posedetection.Keypoint, c: posedetection.Keypoint): number {
     const ab = { x: a.x - b.x, y: a.y - b.y, z: a.z || 0 - (b.z || 0) };
     const bc = { x: b.x - c.x, y: b.y - c.y, z: b.z || 0 - (c.z || 0) };
     const dotProduct = ab.x * bc.x + ab.y * bc.y + ab.z * bc.z;
@@ -28,140 +26,127 @@ function calculate3DAngle(a: posedetection.Keypoint, b: posedetection.Keypoint, 
 }
 const jointOptions: (DefaultOptionType & { angleCompose: number[] })[] = [
     {
-        "value": 'leftEyeAngle',
-        "label": '左眼角',
-        "angleCompose": [2, 3, 7]
+        "value": "leftThumbBaseAngle",
+        "label": "左拇指根部角",
+        "angleCompose": [1, 2, 3]
     },
     {
-        "value": 'rightEyeAngle',
-        "label": '右眼角',
-        "angleCompose": [5, 6, 8]
+        "value": "leftThumbTipAngle",
+        "label": "左拇指尖部角",
+        "angleCompose": [2, 3, 4]
     },
     {
-        "value": 'facialMidlineAngle',
-        "label": '面中角',
-        "angleCompose": [1, 0, 4]
+        "value": "leftIndexBaseAngle",
+        "label": "左食指根部角",
+        "angleCompose": [5, 6, 7]
     },
     {
-        "value": 'mouthNoseAngle',
-        "label": '口鼻角',
-        "angleCompose": [9, 0, 10]
+        "value": "leftIndexTipAngle",
+        "label": "左食指尖部角",
+        "angleCompose": [6, 7, 8]
     },
     {
-        "value": "headShoulderAngle",
-        "label": "头肩角",
-        "angleCompose": [11, 0, 12]
+        "value": "leftMiddleBaseAngle",
+        "label": "左中指根部角",
+        "angleCompose": [9, 10, 11]
     },
     {
-        "value": "leftShoulderAngle",
-        "label": "左肩角",
-        "angleCompose": [13, 11, 23]
+        "value": "leftMiddleTipAngle",
+        "label": "左中指尖部角",
+        "angleCompose": [10, 11, 12]
     },
     {
-        "value": "rightShoulderAngle",
-        "label": "右肩角",
-        "angleCompose": [14, 12, 24]
+        "value": "leftRingBaseAngle",
+        "label": "左无名指根部角",
+        "angleCompose": [13, 14, 15]
     },
     {
-        "value": "leftElbowAngle",
-        "label": "左肘角",
-        "angleCompose": [11, 13, 15]
+        "value": "leftRingTipAngle",
+        "label": "左无名指尖部角",
+        "angleCompose": [14, 15, 16]
     },
     {
-        "value": "rightElbowAngle",
-        "label": "右肘角",
-        "angleCompose": [12, 14, 16]
+        "value": "leftPinkyBaseAngle",
+        "label": "左小指根部角",
+        "angleCompose": [17, 18, 19]
     },
     {
-        "value": "leftWristAngle",
-        "label": "左手腕角",
-        "angleCompose": [13, 15, 17]
+        "value": "leftPinkyTipAngle",
+        "label": "左小指尖部角",
+        "angleCompose": [18, 19, 20]
     },
     {
-        "value": "rightWristAngle",
-        "label": "右手腕角",
-        "angleCompose": [14, 16, 18]
+        "value": "rightThumbBaseAngle",
+        "label": "右拇指根部角",
+        "angleCompose": [1, 2, 3]
     },
     {
-        "value": "leftThumbAngle",
-        "label": "左拇指角",
-        "angleCompose": [21, 15, 17]
+        "value": "rightThumbTipAngle",
+        "label": "右拇指尖部角",
+        "angleCompose": [2, 3, 4]
     },
     {
-        "value": "rightThumbAngle",
-        "label": "右拇指角",
-        "angleCompose": [22, 16, 18]
+        "value": "rightIndexBaseAngle",
+        "label": "右食指根部角",
+        "angleCompose": [5, 6, 7]
     },
     {
-        "value": "leftIndexAngle",
-        "label": "左食指角",
-        "angleCompose": [19, 15, 17]
+        "value": "rightIndexTipAngle",
+        "label": "右食指尖部角",
+        "angleCompose": [6, 7, 8]
     },
     {
-        "value": "rightIndexAngle",
-        "label": "右食指角",
-        "angleCompose": [20, 16, 18]
+        "value": "rightMiddleBaseAngle",
+        "label": "右中指根部角",
+        "angleCompose": [9, 10, 11]
     },
     {
-        "value": "leftHipAngle",
-        "label": "左髋角",
-        "angleCompose": [11, 23, 25]
+        "value": "rightMiddleTipAngle",
+        "label": "右中指尖部角",
+        "angleCompose": [10, 11, 12]
     },
     {
-        "value": "rightHipAngle",
-        "label": "右髋角",
-        "angleCompose": [12, 24, 26]
+        "value": "rightRingBaseAngle",
+        "label": "右无名指根部角",
+        "angleCompose": [13, 14, 15]
     },
     {
-        "value": "leftPelvisAngle",
-        "label": "左骨盆角",
-        "angleCompose": [24, 23, 25]
+        "value": "rightRingTipAngle",
+        "label": "右无名指尖部角",
+        "angleCompose": [14, 15, 16]
     },
     {
-        "value": "rightPelvisAngle",
-        "label": "右骨盆角",
-        "angleCompose": [23, 24, 26]
+        "value": "rightPinkyBaseAngle",
+        "label": "右小指根部角",
+        "angleCompose": [17, 18, 19]
     },
     {
-        "value": "leftKneeAngle",
-        "label": "左膝角",
-        "angleCompose": [23, 25, 27]
-    },
-    {
-        "value": "rightKneeAngle",
-        "label": "右膝角",
-        "angleCompose": [24, 26, 28]
-    },
-    {
-        "value": "leftAnkleAngle",
-        "label": "左踝角",
-        "angleCompose": [25, 27, 29]
-    },
-    {
-        "value": "rightAnkleAngle",
-        "label": "右踝角",
-        "angleCompose": [26, 28, 30]
-    },
-    {
-        "value": "leftHeelAngle",
-        "label": "左足跟角",
-        "angleCompose": [27, 29, 31]
-    },
-    {
-        "value": "rightHeelAngle",
-        "label": "右足跟角",
-        "angleCompose": [28, 30, 32]
+        "value": "rightPinkyTipAngle",
+        "label": "右小指尖部角",
+        "angleCompose": [18, 19, 20]
     }
 ];
-function genPoseJoints({ keypoints }: any, poseCaptureThreshold: number) {
+function genPoseJoints(hands: Hand[]) {
     return jointOptions?.filter((option) => {
         const angleCompose = option.angleCompose;
-        return angleCompose.every((index) => poseCaptureThreshold < ((keypoints[index] as any).score));
+        let keypoints: Keypoint[] | undefined;
+        if ((option?.value as string).startsWith('right')) {
+            keypoints = hands.find(({ handedness }) => handedness === 'Right')?.keypoints;
+        } else {
+            keypoints = hands.find(({ handedness }) => handedness === 'Left')?.keypoints;
+        }
+        if (keypoints && keypoints.length === 21) {
+            option._keypoints = keypoints;
+            return angleCompose.every((index) => keypoints[index]);
+        } else {
+            return false;
+        }
     }).map((option) => {
         const angleCompose = option.angleCompose;
+        let keypoints: Keypoint[] = option._keypoints;
         return {
             ...option,
-            angle: calculate3DAngle(keypoints[angleCompose[0]], keypoints[angleCompose[1]], keypoints[angleCompose[2]], 0)
+            angle: calculate3DAngle(keypoints[angleCompose[0]], keypoints[angleCompose[1]], keypoints[angleCompose[2]])
         }
     });
 }
@@ -181,17 +166,25 @@ function UploadPose({ onChange, value, detector }: any) {
                         canvas.width = img.width;
                         canvas.height = img.height;
                         ctx.drawImage(img, 0, 0, img.width, img.height);
-                        let validatePoses = await detector.estimatePoses(img);
-                        if (validatePoses) {
-                            for (let pose of validatePoses) {
-                                if (pose.keypoints != null) {
-                                    drawKeypoints(ctx, pose.keypoints, { lineWidth: 8 });
-                                    drawSkeleton(ctx, pose.keypoints, { lineWidth: 3, color: '#ffffff' });
-                                    onSuccess && onSuccess({ validatePose: pose, url: canvas.toDataURL() });
-                                    break;
-                                }
+                        let validateHands = await detector.estimateHands(img);
+                        const hands = validateHands as Hand[];
+                        hands.sort((hand1, hand2) => {
+                            if (hand1.handedness < hand2.handedness) return 1;
+                            if (hand1.handedness > hand2.handedness) return -1;
+                            return 0;
+                        });
+                        while (hands.length < 2) hands.push({} as any);
+                        for (let i = 0; i < hands.length; ++i) {
+                            const hand = hands[i];
+                            if (hand.keypoints && hand.handedness) {
+                                drawKeypoints(ctx, hand.keypoints, hand.handedness, true, true, {
+                                    keypointsLineWidth: 8,
+                                    skeletonLineWidth: 3,
+                                    skeletonColor: '#ffffff'
+                                });
                             }
                         }
+                        onSuccess && onSuccess({ validateHands, url: canvas.toDataURL() });
                     }
                     img.src = reader.result as string;
                 }
@@ -217,17 +210,21 @@ function UploadPose({ onChange, value, detector }: any) {
         }
     </>
 }
-
-
-function RealTimeAngle({ nodeId, option, poseScoreThreshold }: any) {
+function RealTimeAngle({ nodeId, option }: any) {
     const [realtimeJointAngleStr, setRealtimeJointAngleStr] = useState<string>();
     useEffect(() => {
-        return useRuntimeNodeStore.subscribe((state) => state.get(nodeId, "pose"), (pose) => {
-            const angleCompose = jointOptions.find(({ value }: any) => value === option.value)?.angleCompose as number[];
+        return useRuntimeNodeStore.subscribe((state) => state.get(nodeId, "hands"), (hands: Hand[]) => {
+            const jointOption = jointOptions.find(({ value }: any) => value === option.value);
+            const angleCompose = jointOption?.angleCompose as number[];
+            let keypoints: Keypoint[] | undefined;
+            if ((jointOption?.value as string).startsWith('right')) {
+                keypoints = hands && hands.find(({ handedness }) => handedness === 'Right')?.keypoints;
+            } else {
+                keypoints = hands && hands.find(({ handedness }) => handedness === 'Left')?.keypoints;
+            }
             let realtimeJointAngle = Infinity;
-            if (angleCompose && pose?.keypoints) {
-                const keypoints = pose.keypoints;
-                realtimeJointAngle = calculate3DAngle(keypoints[angleCompose[0]], keypoints[angleCompose[1]], keypoints[angleCompose[2]], poseScoreThreshold);
+            if (keypoints && keypoints.length === 21 && angleCompose) {
+                realtimeJointAngle = calculate3DAngle(keypoints[angleCompose[0]], keypoints[angleCompose[1]], keypoints[angleCompose[2]]);
             }
             setRealtimeJointAngleStr(realtimeJointAngle === Infinity ? "不可信" : (realtimeJointAngle && realtimeJointAngle.toFixed(1)) + "°");
         });
@@ -235,8 +232,12 @@ function RealTimeAngle({ nodeId, option, poseScoreThreshold }: any) {
 
     return realtimeJointAngleStr;
 }
-function JointSelect({ onChange, value, nodeId, poseScoreThreshold }: any) {
+function JointSelect({ onChange, value, nodeId }: any) {
     const [open, setOpen] = useState(false);
+    const hands = useRef<any>();
+    useEffect(() => {
+        return useRuntimeNodeStore.subscribe((state) => state.get(nodeId, "hands"), (hands_) => hands.current = hands_);
+    }, []);
     return <Select size='small' style={{ maxWidth: 310 }} value={value} onChange={(v: string[]) => {
         onChange(v.map(key => {
             const item = value && value.find((item: any) => item.value === key);
@@ -273,7 +274,7 @@ function JointSelect({ onChange, value, nodeId, poseScoreThreshold }: any) {
                 <div style={{ display: "flex" }}>
                     {option.label}
                     <div style={{ width: '20px', display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-                        <div style={{ color: 'green', fontSize: 7, lineHeight: '8px' }}><RealTimeAngle option={option} nodeId={nodeId} poseScoreThreshold={poseScoreThreshold} /> </div>
+                        <div style={{ color: 'green', fontSize: 7, lineHeight: '8px' }}><RealTimeAngle option={option} nodeId={nodeId} ></RealTimeAngle></div>
                         <div style={{ color: 'red', fontSize: 7, lineHeight: '7px' }}>{jointAngle && jointAngle.toFixed(1)}°</div>
                     </div>
                 </div>
@@ -589,19 +590,27 @@ function ScoreAlgorithmSelect({ onChange, value }: any) {
         </Flex>
     </>
 }
-function Score({ nodeId, scoreAlgorithm, poseScoreThreshold }: any) {
+function Score({ nodeId, scoreAlgorithm }: any) {
     const score = useRef<number | null>(null);
     const setRuntimeNodeData = useRuntimeNodeStore((state) => (nodeData: any) => state.set(nodeId, nodeData));
     useDeepCompareEffect(() => {
-        return useRuntimeNodeStore.subscribe(state => state.get(nodeId, "pose"), pose => {
-            if (pose?.keypoints && scoreAlgorithm?.algorithm && scoreAlgorithm?.weights) {
-                const keypoints: posedetection.Keypoint[] = pose.keypoints;
+        return useRuntimeNodeStore.subscribe(state => state.get(nodeId, "hands"), (hands: Hand[]) => {
+            if (hands && scoreAlgorithm?.algorithm && scoreAlgorithm?.weights) {
                 const algorithmFun = algorithmFuns[scoreAlgorithm.algorithm] || weightedCosineSimilarity;
                 const weights = scoreAlgorithm.weights;
                 let A: number[] = [], B: number[] = [], weightsValue: number[] = [];
-                weights.forEach(({ angleCompose: [p1, p2, p3], angle, value: weight }: any) => {
-                    const realtimeAngle = calculate3DAngle(keypoints[p1], keypoints[p2], keypoints[p3], poseScoreThreshold);
-                    A.push(realtimeAngle);
+                weights.forEach(({ key, angleCompose: [p1, p2, p3], angle, value: weight }: any) => {
+                    let keypoints: Keypoint[] | undefined;
+                    if ((key as string).startsWith('right')) {
+                        keypoints = hands && hands.find(({ handedness }) => handedness === 'Right')?.keypoints;
+                    } else {
+                        keypoints = hands && hands.find(({ handedness }) => handedness === 'Left')?.keypoints;
+                    }
+                    if (keypoints) {
+                        A.push(calculate3DAngle(keypoints[p1], keypoints[p2], keypoints[p3]));
+                    } else {
+                        A.push(Infinity);
+                    }
                     B.push(angle);
                     weightsValue.push(weight);
                 });
@@ -628,21 +637,20 @@ function Score({ nodeId, scoreAlgorithm, poseScoreThreshold }: any) {
                 setRuntimeNodeData({ score: score_ });
             }
         });
-    }, [scoreAlgorithm, poseScoreThreshold]);
+    }, [scoreAlgorithm]);
     return score.current && score.current.toFixed(1);
 }
 
-export function PoseValidator({ id, selected, data }: NodeProps<PoseValidator>) {
+export function HandPoseValidator({ id, selected, data }: NodeProps<PoseValidator>) {
     const [configVisible, setConfigVisible] = useState(false);
-    const [poseCaptureThresholdVisible, setPoseCaptureThresholdVisible] = useState(false);
-    const detector = usePoseDetector();
+    const detector = useHandPoseDetector();
     const [form] = Form.useForm();
     const updateNodeInternals = useUpdateNodeInternals();
     return <ResizableNode data={data} selected={selected}>
         {(width, height) => <>
             <UseHandle input={[{
-                id: "pose", label: <span>
-                    姿态数据
+                id: "hands", label: <span>
+                    手势数据
                     <Button size="small" type="link" onClick={() => setConfigVisible(old => !old)}>
                         配置
                     </Button>
@@ -651,7 +659,7 @@ export function PoseValidator({ id, selected, data }: NodeProps<PoseValidator>) 
                 id: "score", label: <span>
                     得分
                     <sup style={{ color: 'red' }}>
-                        <Score nodeId={id} scoreAlgorithm={data.scoreAlgorithm} poseScoreThreshold={data.poseScoreThreshold}></Score>
+                        <Score nodeId={id} scoreAlgorithm={data.scoreAlgorithm}></Score>
                     </sup>
                 </span>
             }]} />
@@ -663,9 +671,9 @@ export function PoseValidator({ id, selected, data }: NodeProps<PoseValidator>) 
                 onValuesChange={(changedValues, values) => {
                     Object.assign(data, values);
                     let poseJoints = changedValues?.poseJoints;
-                    if (changedValues?.poseCaptureThreshold || changedValues?.validatePoseImage) {
-                        if (values?.validatePoseImage?.validatePose) {
-                            poseJoints = genPoseJoints(values.validatePoseImage.validatePose, values.poseCaptureThreshold || data.poseCaptureThreshold);
+                    if (changedValues?.poseCaptureThreshold || changedValues?.validateHandPoseImage) {
+                        if (values?.validateHandPoseImage?.validateHands) {
+                            poseJoints = genPoseJoints(values.validateHandPoseImage.validateHands);
                         }
                     }
                     if (poseJoints) {
@@ -696,22 +704,11 @@ export function PoseValidator({ id, selected, data }: NodeProps<PoseValidator>) 
                     updateNodeInternals(id);
                 }}
             >
-                <Form.Item label={<span>
-                    上传姿势
-                    <Button size="small" type="link" onClick={() => setPoseCaptureThresholdVisible(old => !old)}>
-                        配置
-                    </Button>
-                </span>} name="validatePoseImage" style={{ width: 230 }}>
+                <Form.Item label="上传手势" name="validateHandPoseImage" style={{ width: 230 }}>
                     <UploadPose detector={detector}></UploadPose>
                 </Form.Item>
-                {poseCaptureThresholdVisible && <Form.Item label="捕获阈值" name="poseCaptureThreshold">
-                    <Slider min={0} max={1} step={0.01} className="nodrag nopan" marks={{ 0.35: 0.35, 0.75: 0.75, 0.95: 0.95 }} />
-                </Form.Item>}
                 <Form.Item label="捕获关节" name="poseJoints">
-                    <JointSelect nodeId={id} poseScoreThreshold={data.poseScoreThreshold} />
-                </Form.Item>
-                <Form.Item label="关节点置信阈值" name="poseScoreThreshold">
-                    <Slider min={0} max={1} step={0.01} className="nodrag nopan" marks={{ 0.25: 0.25, 0.65: 0.65, 0.85: 0.85 }} />
+                    <JointSelect nodeId={id} />
                 </Form.Item>
                 <Form.Item label="得分" name="scoreAlgorithm">
                     <ScoreAlgorithmSelect />

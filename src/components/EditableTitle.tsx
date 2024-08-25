@@ -45,7 +45,7 @@ const EditableTitle: React.FC<EditableTitleProps> = ({ title: initialTitle, onCh
           autoFocus
         />
       ) : (
-        <div onClick={handleEdit} className="nopan" style={{ cursor: 'pointer' }}>
+        <div onClick={handleEdit} className="nopan" style={{ minHeight: '16px', cursor: 'pointer' }}>
           {title}
         </div>
       )}

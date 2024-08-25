@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 import {
   ReactFlow,
   Background,
@@ -10,7 +10,8 @@ import {
   type OnConnect,
   useReactFlow,
   Panel,
-  useUpdateNodeInternals
+  useUpdateNodeInternals,
+  Edge
 } from '@xyflow/react';
 import { Button, Flex } from 'antd';
 import '@xyflow/react/dist/style.css';
@@ -19,19 +20,22 @@ import { initialNodes, nodeTypes } from './nodes';
 import { initialEdges, edgeTypes } from './edges';
 import ContextMenu from './ContextMenu';
 import { create } from 'zustand';
+import { subscribeWithSelector } from 'zustand/middleware';
+import { Tensor } from '@tensorflow/tfjs-core';
 
 interface RuntimeNodeState {
-  [id: string]: { [K: string]: any },
+  edges: Edge[],
+  [id: string]: { [K: string]: Tensor | any },
   get: (id: string, key?: string) => any,
-  set: (id: string, nodeData: { [K: string]: any }) => void
+  set: (id: string, nodeData: { [K: string]: Tensor | any }) => void
 }
 
-export const useRuntimeNodeStore = create<RuntimeNodeState>((setState, getState, store) => {
+export const useRuntimeNodeStore = create<RuntimeNodeState>()(subscribeWithSelector((setState, getState) => {
   return {
+    edges: [],
     get(id: string, key?: string) {
-      const { getEdges } = useReactFlow();
-      const edges = getEdges();
       const state = getState();
+      const edges = state.edges;
       const getOne = (id: string, key: string) => {
         let id_ = id, key_ = key;
         for (
@@ -54,11 +58,20 @@ export const useRuntimeNodeStore = create<RuntimeNodeState>((setState, getState,
       }
       return getOne(id, key);
     },
-    set(id: string, nodeData: { [K: string]: any }) {
-      setState(state => ({ [id]: { ...state[id], ...nodeData } }));
+    set(id: string, nodeData: { [K: string]: Tensor | any }) {
+      setState(state => {
+        const currentData = state[id] || {};
+        Object.keys(nodeData).forEach(key => {
+          const prevValue = currentData[key];
+          if (prevValue instanceof Tensor) {
+            prevValue.dispose();
+          }
+        });
+        return { [id]: { ...currentData, ...nodeData } };
+      });
     }
   };
-});
+}));
 
 export default function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -68,13 +81,16 @@ export default function App() {
   const { screenToFlowPosition } = useReactFlow();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const updateNodeInternals = useUpdateNodeInternals();
-
   const onConnect: OnConnect = useCallback(
     (connection) => {
       setEdges((edges) => addEdge(connection, edges));
       updateNodeInternals(connection.target);
     }, []
   );
+  useEffect(() => {
+    useRuntimeNodeStore.setState({ edges });
+  }, [edges]);
+
   const onContextMenu = useCallback((event: any) => {
     event.preventDefault();
     if (reactFlowWrapper?.current) {
@@ -86,7 +102,6 @@ export default function App() {
       setMenuPosition(position);
     }
   }, []);
-
   const onAddNode = useCallback(({ key: type, data }: any) => {
     if (menuPosition) {
       const newNode = {

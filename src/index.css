@@ -15,6 +15,12 @@ body,
   text-align: left;
 }
 
+.react-flow__node-default {
+  width: 100%;
+  height: 100%;
+  padding: 0px;
+}
+
 .react-flow__node-input,
 .react-flow__node-default,
 .react-flow__node-output,
