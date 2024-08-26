@@ -21,7 +21,7 @@ export const NODES_EXTRA_DATA: Record<BlockEnum, NodesExtraData> = {
     getAvailableNextNodes: StartNodeDefault.getAvailableNextNodes,
     checkValid: StartNodeDefault.checkValid,
   },
-  [BlockEnum.VideoInput]: {
+  [BlockEnum.CameraInput]: {
     author: 'Official',
     about: '',
     availablePrevNodes: [],
@@ -72,8 +72,8 @@ export const NODES_INITIAL_DATA: Record<BlockEnum, {
     title: '',
     desc: '',
   },
-  [BlockEnum.VideoInput]: {
-    type: BlockEnum.VideoInput,
+  [BlockEnum.CameraInput]: {
+    type: BlockEnum.CameraInput,
     title: '输入视频流',
     desc: '',
   },

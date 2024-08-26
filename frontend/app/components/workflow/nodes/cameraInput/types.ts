@@ -1,3 +1,3 @@
 import type { CommonNodeType } from '@/app/components/workflow/types'
 
-export type VideoNodeType = CommonNodeType
+export type CameraNodeType = CommonNodeType

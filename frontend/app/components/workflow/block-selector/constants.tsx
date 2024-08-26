@@ -16,7 +16,7 @@ export const BLOCKS: Block[] = [
   // },
   {
     classification: BlockClassificationEnum.Default,
-    type: BlockEnum.VideoInput,
+    type: BlockEnum.CameraInput,
     title: 'Video Input',
   },
   {

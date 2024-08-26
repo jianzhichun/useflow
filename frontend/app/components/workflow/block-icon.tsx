@@ -32,7 +32,7 @@ const ICON_CONTAINER_CLASSNAME_SIZE_MAP: Record<string, string> = {
 const getIcon = (type: BlockEnum, className: string) => {
   return {
     [BlockEnum.Start]: <Home className={className} />,
-    [BlockEnum.VideoInput]: <Llm className={className} />,
+    [BlockEnum.CameraInput]: <Llm className={className} />,
     // [BlockEnum.Code]: <Code className={className} />,
     [BlockEnum.End]: <End className={className} />,
     // [BlockEnum.IfElse]: <IfElse className={className} />,
@@ -50,7 +50,7 @@ const getIcon = (type: BlockEnum, className: string) => {
 }
 const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.Start]: 'bg-primary-500',
-  [BlockEnum.VideoInput]: 'bg-[#6172F3]',
+  [BlockEnum.CameraInput]: 'bg-[#6172F3]',
   // [BlockEnum.Code]: 'bg-[#2E90FA]',
   [BlockEnum.End]: 'bg-[#F79009]',
   // [BlockEnum.IfElse]: 'bg-[#06AED4]',
