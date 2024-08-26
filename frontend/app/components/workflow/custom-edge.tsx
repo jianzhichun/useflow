@@ -34,7 +34,7 @@ const CustomEdge = ({
     sourceY,
     sourcePosition: Position.Right,
     targetX: targetX + 8,
-    targetY,
+  targetY,
     targetPosition: Position.Left,
     curvature: 0.16,
   })

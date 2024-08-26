@@ -74,7 +74,7 @@ export const NODES_INITIAL_DATA: Record<BlockEnum, {
   },
   [BlockEnum.VideoInput]: {
     type: BlockEnum.VideoInput,
-    title: '',
+    title: '输入视频流',
     desc: '',
   },
   [BlockEnum.End]: {

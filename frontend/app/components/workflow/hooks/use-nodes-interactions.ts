@@ -19,12 +19,22 @@ import {
 import type { Edge, Node } from "../types";
 import { BlockEnum } from "../types";
 import { useWorkflowStore } from "../store";
-import { ITERATION_CHILDREN_Z_INDEX, ITERATION_PADDING } from "../constants";
+import {
+  ITERATION_CHILDREN_Z_INDEX,
+  ITERATION_PADDING,
+  NODE_WIDTH_X_OFFSET,
+  NODES_INITIAL_DATA,
+  X_OFFSET,
+  Y_OFFSET,
+} from "../constants";
 import {
   WorkflowHistoryEvent,
   useWorkflowHistory,
 } from "./use-workflow-history";
-import { getNodesConnectedSourceOrTargetHandleIdsMap } from "../utils";
+import {
+  generateNewNode,
+  getNodesConnectedSourceOrTargetHandleIdsMap,
+} from "../utils";
 import { OnNodeAdd } from "@/types/workflow";
 
 export const useNodesInteractions = () => {
@@ -193,338 +203,116 @@ export const useNodesInteractions = () => {
 
   const handleNodeDelete = useCallback((nodeId: string) => {}, []);
 
-  const handleNodeAdd = useCallback<OnNodeAdd>((
-    {
-      nodeType,
-      sourceHandle = 'source',
-      targetHandle = 'target',
-      toolDefaultValue,
+  const handleNodeAdd = useCallback<OnNodeAdd>(
+    (
+      {
+        nodeType,
+        sourceHandle = "source",
+        targetHandle = "target",
+        toolDefaultValue,
+      },
+      { prevNodeId, prevNodeSourceHandle, nextNodeId, nextNodeTargetHandle }
+    ) => {
+      const { getNodes, setNodes, edges, setEdges } = store.getState();
+      const nodes = getNodes();
+      const nodesWithSameType = nodes.filter(
+        (node) => node.data.type === nodeType
+      );
+      const newNode = generateNewNode({
+        data: {
+          ...NODES_INITIAL_DATA[nodeType],
+          title:
+            nodesWithSameType.length > 0
+              ? `${t(`workflow.blocks.${nodeType}`)} ${
+                  nodesWithSameType.length + 1
+                }`
+              : t(`workflow.blocks.${nodeType}`),
+          ...(toolDefaultValue || {}),
+          selected: true,
+          _showAddVariablePopup: !!prevNodeId,
+          _holdAddVariablePopup: false,
+        },
+        position: {
+          x: 0,
+          y: 0,
+        },
+      });
+      if (prevNodeId && !nextNodeId) {
+        const prevNodeIndex = nodes.findIndex((node) => node.id === prevNodeId);
+        const prevNode = nodes[prevNodeIndex];
+        const outgoers = getOutgoers(prevNode, nodes, edges).sort(
+          (a, b) => a.position.y - b.position.y
+        );
+        const lastOutgoer = outgoers[outgoers.length - 1];
+
+        newNode.data._connectedTargetHandleIds = [targetHandle];
+        newNode.data._connectedSourceHandleIds = [];
+        newNode.position = {
+          x: lastOutgoer
+            ? lastOutgoer.position.x
+            : prevNode.position.x + prevNode.width! + X_OFFSET,
+          y: lastOutgoer
+            ? lastOutgoer.position.y + lastOutgoer.height! + Y_OFFSET
+            : prevNode.position.y,
+        };
+        newNode.parentId = prevNode.parentId;
+        newNode.extent = prevNode.extent;
+        if (prevNode.parentId) {
+          newNode.data.isInIteration = true;
+          newNode.data.iteration_id = prevNode.parentId;
+          newNode.zIndex = ITERATION_CHILDREN_Z_INDEX;
+        }
+
+        const newEdge: Edge = {
+          id: `${prevNodeId}-${prevNodeSourceHandle}-${newNode.id}-${targetHandle}`,
+          type: "custom",
+          source: prevNodeId,
+          sourceHandle: prevNodeSourceHandle,
+          target: newNode.id,
+          targetHandle,
+          data: {
+            sourceType: prevNode.data.type,
+            targetType: newNode.data.type,
+            isInIteration: !!prevNode.parentId,
+            iteration_id: prevNode.parentId,
+            _connectedNodeIsSelected: true,
+          },
+          zIndex: prevNode.parentId ? ITERATION_CHILDREN_Z_INDEX : 0,
+        };
+        const nodesConnectedSourceOrTargetHandleIdsMap =
+          getNodesConnectedSourceOrTargetHandleIdsMap(
+            [{ type: "add", edge: newEdge }],
+            nodes
+          );
+        const newNodes = produce(nodes, (draft: Node[]) => {
+          draft.forEach((node) => {
+            node.data.selected = false;
+
+            if (nodesConnectedSourceOrTargetHandleIdsMap[node.id]) {
+              node.data = {
+                ...node.data,
+                ...nodesConnectedSourceOrTargetHandleIdsMap[node.id],
+              };
+            }
+          });
+          draft.push(newNode);
+        });
+        setNodes(newNodes);
+        const newEdges = produce(edges, (draft) => {
+          draft.forEach((item) => {
+            item.data = {
+              ...item.data,
+              _connectedNodeIsSelected: false,
+            };
+          });
+          draft.push(newEdge);
+        });
+        setEdges(newEdges);
+      }
+      saveStateToHistory(WorkflowHistoryEvent.NodeAdd)
     },
-    {
-      prevNodeId,
-      prevNodeSourceHandle,
-      nextNodeId,
-      nextNodeTargetHandle,
-    },
-  ) => {
-    // if (getNodesReadOnly())
-    //   return
-
-    const {
-      getNodes,
-      setNodes,
-      edges,
-      setEdges,
-    } = store.getState()
-    const nodes = getNodes()
-    const nodesWithSameType = nodes.filter(node => node.data.type === nodeType)
-    // const newNode = generateNewNode({
-    //   data: {
-    //     ...NODES_INITIAL_DATA[nodeType],
-    //     title: nodesWithSameType.length > 0 ? `${t(`workflow.blocks.${nodeType}`)} ${nodesWithSameType.length + 1}` : t(`workflow.blocks.${nodeType}`),
-    //     ...(toolDefaultValue || {}),
-    //     selected: true,
-    //     _showAddVariablePopup: (nodeType === BlockEnum.VariableAssigner || nodeType === BlockEnum.VariableAggregator) && !!prevNodeId,
-    //     _holdAddVariablePopup: false,
-    //   },
-    //   position: {
-    //     x: 0,
-    //     y: 0,
-    //   },
-    // })
-    // if (prevNodeId && !nextNodeId) {
-    //   const prevNodeIndex = nodes.findIndex(node => node.id === prevNodeId)
-    //   const prevNode = nodes[prevNodeIndex]
-    //   const outgoers = getOutgoers(prevNode, nodes, edges).sort((a, b) => a.position.y - b.position.y)
-    //   const lastOutgoer = outgoers[outgoers.length - 1]
-
-    //   newNode.data._connectedTargetHandleIds = [targetHandle]
-    //   newNode.data._connectedSourceHandleIds = []
-    //   newNode.position = {
-    //     x: lastOutgoer ? lastOutgoer.position.x : prevNode.position.x + prevNode.width! + X_OFFSET,
-    //     y: lastOutgoer ? lastOutgoer.position.y + lastOutgoer.height! + Y_OFFSET : prevNode.position.y,
-    //   }
-    //   newNode.parentId = prevNode.parentId
-    //   newNode.extent = prevNode.extent
-    //   if (prevNode.parentId) {
-    //     newNode.data.isInIteration = true
-    //     newNode.data.iteration_id = prevNode.parentId
-    //     newNode.zIndex = ITERATION_CHILDREN_Z_INDEX
-    //   }
-
-    //   const newEdge: Edge = {
-    //     id: `${prevNodeId}-${prevNodeSourceHandle}-${newNode.id}-${targetHandle}`,
-    //     type: 'custom',
-    //     source: prevNodeId,
-    //     sourceHandle: prevNodeSourceHandle,
-    //     target: newNode.id,
-    //     targetHandle,
-    //     data: {
-    //       sourceType: prevNode.data.type,
-    //       targetType: newNode.data.type,
-    //       isInIteration: !!prevNode.parentId,
-    //       iteration_id: prevNode.parentId,
-    //       _connectedNodeIsSelected: true,
-    //     },
-    //     zIndex: prevNode.parentId ? ITERATION_CHILDREN_Z_INDEX : 0,
-    //   }
-    //   const nodesConnectedSourceOrTargetHandleIdsMap = getNodesConnectedSourceOrTargetHandleIdsMap(
-    //     [
-    //       { type: 'add', edge: newEdge },
-    //     ],
-    //     nodes,
-    //   )
-    //   const newNodes = produce(nodes, (draft: Node[]) => {
-    //     draft.forEach((node) => {
-    //       node.data.selected = false
-
-    //       if (nodesConnectedSourceOrTargetHandleIdsMap[node.id]) {
-    //         node.data = {
-    //           ...node.data,
-    //           ...nodesConnectedSourceOrTargetHandleIdsMap[node.id],
-    //         }
-    //       }
-
-    //       if (node.data.type === BlockEnum.Iteration && prevNode.parentId === node.id)
-    //         node.data._children?.push(newNode.id)
-    //     })
-    //     draft.push(newNode)
-    //   })
-    //   setNodes(newNodes)
-    //   if (newNode.data.type === BlockEnum.VariableAssigner || newNode.data.type === BlockEnum.VariableAggregator) {
-    //     const { setShowAssignVariablePopup } = workflowStore.getState()
-
-    //     setShowAssignVariablePopup({
-    //       nodeId: prevNode.id,
-    //       nodeData: prevNode.data,
-    //       variableAssignerNodeId: newNode.id,
-    //       variableAssignerNodeData: (newNode.data as VariableAssignerNodeType),
-    //       variableAssignerNodeHandleId: targetHandle,
-    //       parentNode: nodes.find(node => node.id === newNode.parentId),
-    //       x: -25,
-    //       y: 44,
-    //     })
-    //   }
-    //   const newEdges = produce(edges, (draft) => {
-    //     draft.forEach((item) => {
-    //       item.data = {
-    //         ...item.data,
-    //         _connectedNodeIsSelected: false,
-    //       }
-    //     })
-    //     draft.push(newEdge)
-    //   })
-    //   setEdges(newEdges)
-    // }
-    // if (!prevNodeId && nextNodeId) {
-    //   const nextNodeIndex = nodes.findIndex(node => node.id === nextNodeId)
-    //   const nextNode = nodes[nextNodeIndex]!
-    //   if ((nodeType !== BlockEnum.IfElse) && (nodeType !== BlockEnum.QuestionClassifier))
-    //     newNode.data._connectedSourceHandleIds = [sourceHandle]
-    //   newNode.data._connectedTargetHandleIds = []
-    //   newNode.position = {
-    //     x: nextNode.position.x,
-    //     y: nextNode.position.y,
-    //   }
-    //   newNode.parentId = nextNode.parentId
-    //   newNode.extent = nextNode.extent
-    //   if (nextNode.parentId) {
-    //     newNode.data.isInIteration = true
-    //     newNode.data.iteration_id = nextNode.parentId
-    //     newNode.zIndex = ITERATION_CHILDREN_Z_INDEX
-    //   }
-    //   if (nextNode.data.isIterationStart)
-    //     newNode.data.isIterationStart = true
-
-    //   let newEdge
-
-    //   if ((nodeType !== BlockEnum.IfElse) && (nodeType !== BlockEnum.QuestionClassifier)) {
-    //     newEdge = {
-    //       id: `${newNode.id}-${sourceHandle}-${nextNodeId}-${nextNodeTargetHandle}`,
-    //       type: 'custom',
-    //       source: newNode.id,
-    //       sourceHandle,
-    //       target: nextNodeId,
-    //       targetHandle: nextNodeTargetHandle,
-    //       data: {
-    //         sourceType: newNode.data.type,
-    //         targetType: nextNode.data.type,
-    //         isInIteration: !!nextNode.parentId,
-    //         iteration_id: nextNode.parentId,
-    //         _connectedNodeIsSelected: true,
-    //       },
-    //       zIndex: nextNode.parentId ? ITERATION_CHILDREN_Z_INDEX : 0,
-    //     }
-    //   }
-
-    //   let nodesConnectedSourceOrTargetHandleIdsMap: Record<string, any>
-    //   if (newEdge) {
-    //     nodesConnectedSourceOrTargetHandleIdsMap = getNodesConnectedSourceOrTargetHandleIdsMap(
-    //       [
-    //         { type: 'add', edge: newEdge },
-    //       ],
-    //       nodes,
-    //     )
-    //   }
-
-    //   const afterNodesInSameBranch = getAfterNodesInSameBranch(nextNodeId!)
-    //   const afterNodesInSameBranchIds = afterNodesInSameBranch.map(node => node.id)
-    //   const newNodes = produce(nodes, (draft) => {
-    //     draft.forEach((node) => {
-    //       node.data.selected = false
-
-    //       if (afterNodesInSameBranchIds.includes(node.id))
-    //         node.position.x += NODE_WIDTH_X_OFFSET
-
-    //       if (nodesConnectedSourceOrTargetHandleIdsMap?.[node.id]) {
-    //         node.data = {
-    //           ...node.data,
-    //           ...nodesConnectedSourceOrTargetHandleIdsMap[node.id],
-    //         }
-    //       }
-
-    //       if (node.data.type === BlockEnum.Iteration && nextNode.parentId === node.id)
-    //         node.data._children?.push(newNode.id)
-
-    //       if (node.data.type === BlockEnum.Iteration && node.data.start_node_id === nextNodeId) {
-    //         node.data.start_node_id = newNode.id
-    //         node.data.startNodeType = newNode.data.type
-    //       }
-
-    //       if (node.id === nextNodeId && node.data.isIterationStart)
-    //         node.data.isIterationStart = false
-    //     })
-    //     draft.push(newNode)
-    //   })
-    //   setNodes(newNodes)
-    //   if (newEdge) {
-    //     const newEdges = produce(edges, (draft) => {
-    //       draft.forEach((item) => {
-    //         item.data = {
-    //           ...item.data,
-    //           _connectedNodeIsSelected: false,
-    //         }
-    //       })
-    //       draft.push(newEdge)
-    //     })
-    //     setEdges(newEdges)
-    //   }
-    // }
-    // if (prevNodeId && nextNodeId) {
-    //   const prevNode = nodes.find(node => node.id === prevNodeId)!
-    //   const nextNode = nodes.find(node => node.id === nextNodeId)!
-
-    //   newNode.data._connectedTargetHandleIds = [targetHandle]
-    //   newNode.data._connectedSourceHandleIds = [sourceHandle]
-    //   newNode.position = {
-    //     x: nextNode.position.x,
-    //     y: nextNode.position.y,
-    //   }
-    //   newNode.parentId = prevNode.parentId
-    //   newNode.extent = prevNode.extent
-    //   if (prevNode.parentId) {
-    //     newNode.data.isInIteration = true
-    //     newNode.data.iteration_id = prevNode.parentId
-    //     newNode.zIndex = ITERATION_CHILDREN_Z_INDEX
-    //   }
-
-    //   const currentEdgeIndex = edges.findIndex(edge => edge.source === prevNodeId && edge.target === nextNodeId)
-    //   const newPrevEdge = {
-    //     id: `${prevNodeId}-${prevNodeSourceHandle}-${newNode.id}-${targetHandle}`,
-    //     type: 'custom',
-    //     source: prevNodeId,
-    //     sourceHandle: prevNodeSourceHandle,
-    //     target: newNode.id,
-    //     targetHandle,
-    //     data: {
-    //       sourceType: prevNode.data.type,
-    //       targetType: newNode.data.type,
-    //       isInIteration: !!prevNode.parentId,
-    //       iteration_id: prevNode.parentId,
-    //       _connectedNodeIsSelected: true,
-    //     },
-    //     zIndex: prevNode.parentId ? ITERATION_CHILDREN_Z_INDEX : 0,
-    //   }
-    //   let newNextEdge: Edge | null = null
-    //   if (nodeType !== BlockEnum.IfElse && nodeType !== BlockEnum.QuestionClassifier) {
-    //     newNextEdge = {
-    //       id: `${newNode.id}-${sourceHandle}-${nextNodeId}-${nextNodeTargetHandle}`,
-    //       type: 'custom',
-    //       source: newNode.id,
-    //       sourceHandle,
-    //       target: nextNodeId,
-    //       targetHandle: nextNodeTargetHandle,
-    //       data: {
-    //         sourceType: newNode.data.type,
-    //         targetType: nextNode.data.type,
-    //         isInIteration: !!nextNode.parentId,
-    //         iteration_id: nextNode.parentId,
-    //         _connectedNodeIsSelected: true,
-    //       },
-    //       zIndex: nextNode.parentId ? ITERATION_CHILDREN_Z_INDEX : 0,
-    //     }
-    //   }
-    //   const nodesConnectedSourceOrTargetHandleIdsMap = getNodesConnectedSourceOrTargetHandleIdsMap(
-    //     [
-    //       { type: 'remove', edge: edges[currentEdgeIndex] },
-    //       { type: 'add', edge: newPrevEdge },
-    //       ...(newNextEdge ? [{ type: 'add', edge: newNextEdge }] : []),
-    //     ],
-    //     [...nodes, newNode],
-    //   )
-
-    //   const afterNodesInSameBranch = getAfterNodesInSameBranch(nextNodeId!)
-    //   const afterNodesInSameBranchIds = afterNodesInSameBranch.map(node => node.id)
-    //   const newNodes = produce(nodes, (draft) => {
-    //     draft.forEach((node) => {
-    //       node.data.selected = false
-
-    //       if (nodesConnectedSourceOrTargetHandleIdsMap[node.id]) {
-    //         node.data = {
-    //           ...node.data,
-    //           ...nodesConnectedSourceOrTargetHandleIdsMap[node.id],
-    //         }
-    //       }
-    //       if (afterNodesInSameBranchIds.includes(node.id))
-    //         node.position.x += NODE_WIDTH_X_OFFSET
-
-    //       if (node.data.type === BlockEnum.Iteration && prevNode.parentId === node.id)
-    //         node.data._children?.push(newNode.id)
-    //     })
-    //     draft.push(newNode)
-    //   })
-    //   setNodes(newNodes)
-    //   if (newNode.data.type === BlockEnum.VariableAssigner || newNode.data.type === BlockEnum.VariableAggregator) {
-    //     const { setShowAssignVariablePopup } = workflowStore.getState()
-
-    //     setShowAssignVariablePopup({
-    //       nodeId: prevNode.id,
-    //       nodeData: prevNode.data,
-    //       variableAssignerNodeId: newNode.id,
-    //       variableAssignerNodeData: newNode.data as VariableAssignerNodeType,
-    //       variableAssignerNodeHandleId: targetHandle,
-    //       parentNode: nodes.find(node => node.id === newNode.parentId),
-    //       x: -25,
-    //       y: 44,
-    //     })
-    //   }
-    //   const newEdges = produce(edges, (draft) => {
-    //     draft.splice(currentEdgeIndex, 1)
-    //     draft.forEach((item) => {
-    //       item.data = {
-    //         ...item.data,
-    //         _connectedNodeIsSelected: false,
-    //       }
-    //     })
-    //     draft.push(newPrevEdge)
-
-    //     if (newNextEdge)
-    //       draft.push(newNextEdge)
-    //   })
-    //   setEdges(newEdges)
-    // }
-    // saveStateToHistory(WorkflowHistoryEvent.NodeAdd)
-  }, [store, t, saveStateToHistory, workflowStore])
+    [store, t, saveStateToHistory, workflowStore]
+  );
 
   const handleNodeChange = useCallback(
     (currentNodeId: string, nodeType: BlockEnum, sourceHandle: string) => {},
