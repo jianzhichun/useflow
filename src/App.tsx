@@ -13,7 +13,7 @@ import {
   useUpdateNodeInternals,
   Edge
 } from '@xyflow/react';
-import { Button, Flex } from 'antd';
+import { Button, Flex, Switch, ConfigProvider, theme } from 'antd';
 import '@xyflow/react/dist/style.css';
 import { nanoid } from 'nanoid';
 import { initialNodes, nodeTypes } from './nodes';
@@ -22,6 +22,7 @@ import ContextMenu from './ContextMenu';
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { Tensor } from '@tensorflow/tfjs-core';
+import { MoonOutlined, SunOutlined } from '@ant-design/icons';
 
 interface RuntimeNodeState {
   edges: Edge[],
@@ -74,6 +75,7 @@ export const useRuntimeNodeStore = create<RuntimeNodeState>()(subscribeWithSelec
 }));
 
 export default function App() {
+  const [isDark, setIsDark] = useState(true);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [menuPosition, setMenuPosition] = useState<{ x: number, y: number } | null>();
@@ -147,33 +149,55 @@ export default function App() {
     };
     input.click();
   }, []);
+  useEffect(() => {
+
+  ConfigProvider.config({
+    holderRender: (children) => (
+      <ConfigProvider
+        theme={{ algorithm: [isDark ? theme.darkAlgorithm : theme.defaultAlgorithm, theme.compactAlgorithm] }}
+      >
+        {children}
+      </ConfigProvider>
+    ),
+  });
+  }, [isDark]);
   return (
     <>
-      <ReactFlow
-        ref={reactFlowWrapper}
-        onContextMenu={onContextMenu}
-        onClick={() => setMenuPosition(null)}
-        nodes={nodes}
-        nodeTypes={nodeTypes}
-        onNodesChange={onNodesChange}
-        edges={edges}
-        edgeTypes={edgeTypes}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onInit={setRfInstance}
-        fitView
-      >
-        <Background />
-        <MiniMap />
-        <Controls />
-        <Panel position="top-left">
-          <Flex gap="small" wrap>
-            <Button onClick={onImport}>导入</Button>
-            <Button onClick={onExport}>导出</Button>
-          </Flex>
-        </Panel>
-      </ReactFlow>
-      <ContextMenu position={menuPosition} onAddNode={onAddNode} nodeTypes={nodeTypes} />
+      <ConfigProvider componentSize='small' theme={{ algorithm: [isDark ? theme.darkAlgorithm : theme.defaultAlgorithm, theme.compactAlgorithm] }}>
+        <ReactFlow
+          ref={reactFlowWrapper}
+          onContextMenu={onContextMenu}
+          onClick={() => setMenuPosition(null)}
+          nodes={nodes}
+          nodeTypes={nodeTypes}
+          onNodesChange={onNodesChange}
+          edges={edges}
+          edgeTypes={edgeTypes}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onInit={setRfInstance}
+          colorMode={isDark ? 'dark' : 'light'}
+          fitView
+        >
+          <Background />
+          <MiniMap />
+          <Controls />
+          <Panel position="top-left">
+            <Flex gap="small" wrap>
+              <Button onClick={onImport}>导入</Button>
+              <Button onClick={onExport}>导出</Button>
+            </Flex>
+          </Panel>
+          <Panel position="top-right">
+            <Switch onChange={setIsDark} checked={isDark}
+              checkedChildren={<MoonOutlined />}
+              unCheckedChildren={<SunOutlined />}
+            >
+            </Switch>
+          </Panel>
+        </ReactFlow>
+        <ContextMenu position={menuPosition} onAddNode={onAddNode} nodeTypes={nodeTypes} />
+      </ConfigProvider>
     </>
   );
 }

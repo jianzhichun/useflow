@@ -18,7 +18,7 @@ export function PoseDetection({ id, selected, data }: NodeProps<PoseDetection>) 
     const detector = usePoseDetector(SupportedModels.BlazePose, {
         runtime: 'mediapipe',
         modelType: data.modelType,
-        solutionPath: 'node_modules/@mediapipe/pose'
+        // solutionPath: 'node_modules/@mediapipe/pose'
     });
     useEffect(() => {
         if (detector) {
@@ -50,7 +50,7 @@ export function PoseDetection({ id, selected, data }: NodeProps<PoseDetection>) 
                 />
                 <Form
                     style={{ width }}
-                    size="small"
+                    
                     form={form}
                     initialValues={data}
                     autoComplete="off"

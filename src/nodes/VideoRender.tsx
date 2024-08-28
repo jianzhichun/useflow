@@ -136,13 +136,13 @@ export function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any)
             <UseHandle input={[{
                 id: `param${idx}`, label: <>
                     参数{idx + 1}
-                    <Button size="small" type="link" onClick={() => setConfigVisible(old => !old)}>
+                    <Button  type="link" onClick={() => setConfigVisible(old => !old)}>
                         配置
                     </Button>
                 </>
             }]} />
             <Form.Item {...restField} className="nodrag nopan" name={[idx, "type"]}>
-                <Select style={{ minWidth: 90 }} size='small' options={[
+                <Select style={{ minWidth: 90 }}  options={[
                     { label: "姿态数据", value: "pose" },
                     { label: "手势数据", value: "hands" },
                     { label: "得分信息帧", value: "scoreInfoFrame" }
@@ -159,7 +159,7 @@ export function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any)
                                 <Switch />
                             </Form.Item>
                             <Form.Item {...restField} className="nodrag nopan" name={[idx, "excludeKeypoints"]} label="排除关节">
-                                <Select size="small" optionFilterProp="label" allowClear mode='multiple' options={[
+                                <Select  optionFilterProp="label" allowClear mode='multiple' options={[
                                     { "value": 0, "label": "鼻子" },
                                     { "value": 1, "label": "左眼内" },
                                     { "value": 2, "label": "左眼" },
@@ -223,7 +223,7 @@ export function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any)
                                 <Switch />
                             </Form.Item>
                             <Form.Item {...restField} className="nodrag nopan" name={[idx, "drawFontSize"]} label="字体大小">
-                                <Select size='small' options={[
+                                <Select  options={[
                                     { label: "大", value: "28" },
                                     { label: "中", value: "20" },
                                     { label: "小", value: "11" },
@@ -234,7 +234,7 @@ export function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any)
                                 <ColorPicker />
                             </Form.Item>
                             <Form.Item {...restField} className="nodrag nopan" name={[idx, "drawPosition"]} label="绘制区域">
-                                <Select size='small' options={[
+                                <Select  options={[
                                     { label: "左上", value: "lt" },
                                     { label: "左下", value: "lb" },
                                     { label: "右上", value: "rt" },
@@ -270,10 +270,10 @@ export function VideoRender({ id, selected, data }: NodeProps<VideoRender>) {
                 <UseHandle input={[{
                     id: "tensor", label: <span>
                         视频流&nbsp;
-                        <Button type='dashed' size='small' onClick={() => canvasRef.current && toggleCanvasFullScreen(canvasRef.current)} icon={<FullscreenOutlined />} >全屏</Button>
+                        <Button type='dashed'  onClick={() => canvasRef.current && toggleCanvasFullScreen(canvasRef.current)} icon={<FullscreenOutlined />} >全屏</Button>
                     </span>
                 }]}></UseHandle>
-                <Form size="small" className='nowheel' colon
+                <Form  className='nowheel' colon
                     style={{ width }}
                     form={form} initialValues={data}
                     onValuesChange={(changedValues, values) => {

@@ -64,7 +64,7 @@ export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
     <ResizableNode data={data} selected={selected}>
       {(width) => <>
         <UseHandle output={[{ id: "tensor", label: "视频流" }]}></UseHandle>
-        <Form size="small" colon style={{width}}
+        <Form  colon style={{width}}
           initialValues={data}
           onValuesChange={(_, values) => {
             Object.assign(data, values);

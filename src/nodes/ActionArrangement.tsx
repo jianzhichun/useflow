@@ -22,7 +22,7 @@ export function PoseFrame({ nodeId, idx, restField, remove, frames }: any) {
         <UseHandle input={[{
             id: `score${idx}`, label: <>
                 得分{idx + 1}
-                <Button onClick={() => setConfigVisible(old => !old)} size="small" type="link">
+                <Button onClick={() => setConfigVisible(old => !old)}  type="link">
                     配置
                 </Button>
             </>
@@ -152,7 +152,7 @@ export function ActionArrangement({ id, selected, data }: NodeProps<ActionArrang
             {() => <>
                 <UseHandle output={[{ id: 'frame', label: '信息帧' }]} />
                 <Form
-                    size="small"
+                    
                     form={form}
                     initialValues={data}
                     autoComplete="off"

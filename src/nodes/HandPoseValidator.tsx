@@ -238,7 +238,7 @@ function JointSelect({ onChange, value, nodeId }: any) {
     useEffect(() => {
         return useRuntimeNodeStore.subscribe((state) => state.get(nodeId, "hands"), (hands_) => hands.current = hands_);
     }, []);
-    return <Select size='small' style={{ maxWidth: 310 }} value={value} onChange={(v: string[]) => {
+    return <Select  style={{ maxWidth: 310 }} value={value} onChange={(v: string[]) => {
         onChange(v.map(key => {
             const item = value && value.find((item: any) => item.value === key);
             if (!item) {
@@ -256,7 +256,7 @@ function JointSelect({ onChange, value, nodeId }: any) {
         allowClear labelRender={(option: any) => {
             const jointAngle = value && value.find(({ value }: any) => value === option.value)?.angle || 0;
             return <Popover content={<div onMouseDown={(e) => e.stopPropagation()} style={{ width: 300 }}>
-                <Form size='small' colon>
+                <Form  colon>
                     <Form.Item label="角度">
                         <Slider value={jointAngle} onChange={(v) => {
                             onChange(value.map((item: any) => {
@@ -273,9 +273,9 @@ function JointSelect({ onChange, value, nodeId }: any) {
             </div>}>
                 <div style={{ display: "flex" }}>
                     {option.label}
-                    <div style={{ width: '20px', display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-                        <div style={{ color: 'green', fontSize: 7, lineHeight: '8px' }}><RealTimeAngle option={option} nodeId={nodeId} ></RealTimeAngle></div>
-                        <div style={{ color: 'red', fontSize: 7, lineHeight: '7px' }}>{jointAngle && jointAngle.toFixed(1)}°</div>
+                    <div style={{ width: '15px', marginLeft: 5, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                        <div style={{ color: 'green', fontSize: 6, lineHeight: '6px' }}><RealTimeAngle option={option} nodeId={nodeId} poseScoreThreshold={poseScoreThreshold} /> </div>
+                        <div style={{ color: 'red', fontSize: 6, lineHeight: '6px' }}>{jointAngle && jointAngle.toFixed(1)}°</div>
                     </div>
                 </div>
             </Popover>;
@@ -427,7 +427,7 @@ function ScoreAlgorithmSelect({ onChange, value }: any) {
         <Flex vertical gap={0}>
             <Space wrap>
                 <Select style={{ minWidth: 145 }}
-                    size='small' className='nodrag nopan'
+                     className='nodrag nopan'
                     value={value?.algorithm}
                     onChange={(v: string) => onChange({ ...value, algorithm: v })}
                     options={[
@@ -437,10 +437,10 @@ function ScoreAlgorithmSelect({ onChange, value }: any) {
                         { label: '曼哈顿相似度', value: 'manhattan' }
                     ]}
                 ></Select>
-                <Button size='small' onClick={() => setWeightVisible(old => !old)} icon={<UnorderedListOutlined style={weightVisible && { color: '#91caff' } || {}} />}>
+                <Button  onClick={() => setWeightVisible(old => !old)} icon={<UnorderedListOutlined style={weightVisible && { color: '#91caff' } || {}} />}>
                     权重
                 </Button>
-                <Button size='small' onClick={() => setScalingFunctionVisible(old => !old)} icon={<LineChartOutlined style={scalingFunctionVisible && { color: '#91caff' } || {}} />}>
+                <Button  onClick={() => setScalingFunctionVisible(old => !old)} icon={<LineChartOutlined style={scalingFunctionVisible && { color: '#91caff' } || {}} />}>
                     缩放函数
                 </Button>
             </Space>
@@ -651,7 +651,7 @@ export function HandPoseValidator({ id, selected, data }: NodeProps<PoseValidato
             <UseHandle input={[{
                 id: "hands", label: <span>
                     手势数据
-                    <Button size="small" type="link" onClick={() => setConfigVisible(old => !old)}>
+                    <Button  type="link" onClick={() => setConfigVisible(old => !old)}>
                         配置
                     </Button>
                 </span>
@@ -663,7 +663,7 @@ export function HandPoseValidator({ id, selected, data }: NodeProps<PoseValidato
                     </sup>
                 </span>
             }]} />
-            {configVisible && detector && <Form size="small" colon form={form}
+            {configVisible && detector && <Form  colon form={form}
                 style={{
                     maxHeight: '500px', overflowY: 'auto'
                 }}

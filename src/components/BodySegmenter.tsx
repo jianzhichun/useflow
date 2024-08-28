@@ -49,7 +49,7 @@ class BodySegmenterSingleton {
 export const useBodySegmenter = (model: bodySegmentation.SupportedModels = bodySegmentation.SupportedModels.MediaPipeSelfieSegmentation, config: Config = {
     runtime: 'mediapipe',
     modelType: "general",
-    solutionPath: 'node_modules/@mediapipe/selfie_segmentation'
+    // solutionPath: 'node_modules/@mediapipe/selfie_segmentation'
 }): bodySegmentation.BodySegmenter | null => {
     const detectorRef = useRef<bodySegmentation.BodySegmenter | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
