@@ -18,7 +18,7 @@ import '@xyflow/react/dist/style.css';
 import { nanoid } from 'nanoid';
 import { initialNodes, nodeTypes } from './nodes';
 import { initialEdges, edgeTypes } from './edges';
-import ContextMenu from './ContextMenu';
+import ContextMenu from './components/ContextMenu';
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { Tensor } from '@tensorflow/tfjs-core';

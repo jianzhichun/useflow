@@ -1,5 +1,5 @@
 {
-  "name": "useflow",
+  "name": "映航useflow",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -55,6 +55,7 @@
     "typescript": "^5.5.4",
     "vite": "^5.0.12",
     "vite-plugin-clean": "^1.0.0",
+    "vite-plugin-html": "^3.2.2",
     "vite-plugin-mediapipe": "^0.1.0",
     "vite-plugin-static-copy": "^1.0.6"
   },

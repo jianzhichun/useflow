@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react'
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import { mediapipe } from 'vite-plugin-mediapipe';
 import clean from 'vite-plugin-clean';
+import { createHtmlPlugin } from 'vite-plugin-html';
+import fs from 'fs';
+
+const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
 
 export default defineConfig({
   base: './',
@@ -28,7 +32,14 @@ export default defineConfig({
         { src: 'node_modules/@mediapipe', dest: 'node_modules' },
       ]
     }),
-    react()
+    react(),
+    createHtmlPlugin({
+      inject: {
+        data: {
+          title: pkg.name
+        }
+      }
+    })
   ],
   build: {
     chunkSizeWarningLimit: 10 * 1024,

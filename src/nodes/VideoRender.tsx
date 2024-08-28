@@ -12,7 +12,7 @@ import { FullscreenOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-desi
 import { drawKeypoints, drawSkeleton } from '../components/PoseDetector';
 import { drawKeypoints as drawHandKeypoints } from '../components/HandPoseDetector';
 import { useDeepCompareEffect } from 'ahooks';
-import { customThrottle } from '../Utils';
+import { customThrottle } from '../components/Utils';
 import { Hand } from '@tensorflow-models/hand-pose-detection';
 function toggleCanvasFullScreen(canvas: HTMLCanvasElement) {
     if (canvas.requestFullscreen) {
