@@ -6,12 +6,14 @@ import UseHandle from '../components/UseHandle';
 import { useRuntimeNodeStore } from '../App';
 import { useTfjs } from '../components/Tfjs';
 import ResizableNode from '../components/ResizableNode';
+import { useForm } from 'antd/es/form/Form';
 
 export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const updateNodeInternals = useUpdateNodeInternals();
   const setRuntimeNodeData = useRuntimeNodeStore(state => (nodeData: any) => state.set(id, nodeData));
   const tf = useTfjs();
+  const [form] = useForm();
   useEffect(() => {
     async function getDevices() {
       const deviceInfos = await navigator.mediaDevices.enumerateDevices();
@@ -25,27 +27,42 @@ export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
       const videoElement = document.createElement('video');
       let frid: number;
       async function play() {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: { deviceId: { exact: data.selectedDeviceId } }
-        });
-        videoElement.srcObject = mediaStream;
-        videoElement.onloadeddata = () => {
-          async function processFrame() {
-            if (tf) {
-              const tensor = await tf.browser.fromPixelsAsync(videoElement, 4);
-              if (data?.isMirrored) {
-                const mirroredTensor = tf.reverse(tensor, [1]);
-                setRuntimeNodeData({ tensor: mirroredTensor });
-                tensor.dispose();
-              } else {
-                setRuntimeNodeData({ tensor });
-              }
-              frid = requestAnimationFrame(processFrame);
+        let mediaStream;
+        try {
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: { deviceId: { exact: data.selectedDeviceId } }
+          });
+        } catch (error: any) {
+          if (error.name === 'OverconstrainedError') {
+            if (form) {
+              form.setFieldValue("selectedDeviceId", devices.find((device) => device.kind === 'videoinput')?.deviceId);
             }
+            Object.assign(data, {
+              selectedDeviceId: devices.find((device) => device.kind === 'videoinput')?.deviceId
+            });
+            updateNodeInternals(id);
           }
-          processFrame();
-        };
-        videoElement.play();
+        }
+        if (mediaStream) {
+          videoElement.srcObject = mediaStream;
+          videoElement.onloadeddata = () => {
+            async function processFrame() {
+              if (tf) {
+                const tensor = await tf.browser.fromPixelsAsync(videoElement, 4);
+                if (data?.isMirrored) {
+                  const mirroredTensor = tf.reverse(tensor, [1]);
+                  setRuntimeNodeData({ tensor: mirroredTensor });
+                  tensor.dispose();
+                } else {
+                  setRuntimeNodeData({ tensor });
+                }
+                frid = requestAnimationFrame(processFrame);
+              }
+            }
+            processFrame();
+          };
+          videoElement.play();
+        }
       }
       play();
       return () => {
@@ -58,13 +75,13 @@ export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
         videoElement.srcObject = null;
       };
     }
-  }, [tf, data?.selectedDeviceId, data?.isMirrored]);
+  }, [tf, form, data?.selectedDeviceId, data?.isMirrored]);
 
   return (
     <ResizableNode data={data} selected={selected}>
       {(width) => <>
         <UseHandle output={[{ id: "tensor", label: "视频流" }]}></UseHandle>
-        <Form  colon style={{width}}
+        <Form colon style={{ width }} form={form}
           initialValues={data}
           onValuesChange={(_, values) => {
             Object.assign(data, values);

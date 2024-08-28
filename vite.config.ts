@@ -1,15 +1,15 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { viteStaticCopy } from 'vite-plugin-static-copy';
-import path from "path";
 import { mediapipe } from 'vite-plugin-mediapipe';
-
-
-const isProduction = process.env.NODE_ENV === 'production';
+import clean from 'vite-plugin-clean';
 
 export default defineConfig({
   base: './',
   plugins: [
+    (clean as any)({
+      targetFiles: ['dist']
+    }),
     mediapipe({
       "pose.js": [
         "Pose"
