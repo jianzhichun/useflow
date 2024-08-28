@@ -102,7 +102,7 @@ class HandPoseDetectorSingleton {
 
 export const useHandPoseDetector = (model: handPoseDetection.SupportedModels = handPoseDetection.SupportedModels.MediaPipeHands, config: Config = {
     runtime: 'mediapipe',
-    // solutionPath: 'node_modules/@mediapipe/hands'
+    solutionPath: 'node_modules/@mediapipe/hands'
 }): handPoseDetection.HandDetector | null => {
     const detectorRef = useRef<handPoseDetection.HandDetector | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);

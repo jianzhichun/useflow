@@ -1,22 +1,34 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { viteStaticCopy } from 'vite-plugin-static-copy';
-import commonjs from '@rollup/plugin-commonjs';
+import path from "path";
+import { mediapipe } from 'vite-plugin-mediapipe';
 
-// https://vitejs.dev/config/
+
+const isProduction = process.env.NODE_ENV === 'production';
+
 export default defineConfig({
   base: './',
   plugins: [
-    viteStaticCopy({
-      targets: [
-        { src: 'node_modules/@tensorflow', dest: 'node_modules/@tensorflow' },
-        { src: 'node_modules/@mediapipe', dest: 'node_modules/@mediapipe' },
+    mediapipe({
+      "pose.js": [
+        "Pose"
+      ],
+      "hands.js": [
+        "Hands"
+      ],
+      "selfie_segmentation.js": [
+        "SelfieSegmentation"
       ]
     }),
-    react(),
-    commonjs({
-      include: /node_modules\/(@tensorflow|@mediapipe)/
-    })
+    viteStaticCopy({
+      targets: [
+        { src: 'node_modules/@tensorflow-models', dest: 'node_modules' },
+        { src: 'node_modules/@tensorflow', dest: 'node_modules' },
+        { src: 'node_modules/@mediapipe', dest: 'node_modules' },
+      ]
+    }),
+    react()
   ],
   build: {
     chunkSizeWarningLimit: 10 * 1024,

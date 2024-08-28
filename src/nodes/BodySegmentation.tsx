@@ -20,7 +20,7 @@ export function BodySegmentation({ id, selected, data }: NodeProps<PoseDetection
     const bodySegmenter = useBodySegmenter(SupportedModels.MediaPipeSelfieSegmentation, {
         runtime: 'mediapipe',
         modelType: data.modelType,
-        // solutionPath: 'node_modules/@mediapipe/selfie_segmentation'
+        solutionPath: 'node_modules/@mediapipe/selfie_segmentation'
     });
     useEffect(() => {
         if (tf && bodySegmenter) {

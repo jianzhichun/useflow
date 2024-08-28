@@ -110,7 +110,7 @@ class PoseDetectorSingleton {
 export const usePoseDetector = (model: posedetection.SupportedModels = posedetection.SupportedModels.BlazePose, config: Config = {
     runtime: 'mediapipe',
     modelType: "full",
-    // solutionPath: 'node_modules/@mediapipe/pose'
+    solutionPath: 'node_modules/@mediapipe/pose'
 }): posedetection.PoseDetector | null => {
     const detectorRef = useRef<posedetection.PoseDetector | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);

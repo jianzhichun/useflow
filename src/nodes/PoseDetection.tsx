@@ -18,7 +18,7 @@ export function PoseDetection({ id, selected, data }: NodeProps<PoseDetection>) 
     const detector = usePoseDetector(SupportedModels.BlazePose, {
         runtime: 'mediapipe',
         modelType: data.modelType,
-        // solutionPath: 'node_modules/@mediapipe/pose'
+        solutionPath: 'node_modules/@mediapipe/pose'
     });
     useEffect(() => {
         if (detector) {

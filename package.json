@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "electron-dev": "electron .",
+    "electron-dev": "vite build && electron .",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -54,6 +54,7 @@
     "eslint-plugin-react-refresh": "^0.4.5",
     "typescript": "^5.5.4",
     "vite": "^5.0.12",
+    "vite-plugin-mediapipe": "^0.1.0",
     "vite-plugin-static-copy": "^1.0.6"
   },
   "main": "main.js",

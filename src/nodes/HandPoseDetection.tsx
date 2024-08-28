@@ -18,7 +18,7 @@ export function HandPoseDetection({ id, selected, data }: NodeProps<HandPoseDete
     const detector = useHandPoseDetector(SupportedModels.MediaPipeHands, {
         runtime: 'mediapipe',
         modelType: data.modelType,
-        // solutionPath: 'node_modules/@mediapipe/hands'
+        solutionPath: 'node_modules/@mediapipe/hands'
     });
     useEffect(() => {
         if (detector) {
