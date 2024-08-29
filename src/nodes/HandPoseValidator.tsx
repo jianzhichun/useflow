@@ -274,7 +274,7 @@ function JointSelect({ onChange, value, nodeId }: any) {
                 <div style={{ display: "flex" }}>
                     {option.label}
                     <div style={{ width: '15px', marginLeft: 5, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-                        <div style={{ color: 'green', fontSize: 6, lineHeight: '6px' }}><RealTimeAngle option={option} nodeId={nodeId} poseScoreThreshold={poseScoreThreshold} /> </div>
+                        <div style={{ color: 'green', fontSize: 6, lineHeight: '6px' }}><RealTimeAngle option={option} nodeId={nodeId} /> </div>
                         <div style={{ color: 'red', fontSize: 6, lineHeight: '6px' }}>{jointAngle && jointAngle.toFixed(1)}°</div>
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 import CryptoJS from 'crypto-js';
-const secretKey = import.meta.env.SECRET_KEY;
+const secretKey = "d1b8c25a0bca82bfc5a923b8a0f3b4f93f8c5d7d3e3e2e7e18dbf9e3a839a8f4";
 
 export function encrypt(data: string) {
   return CryptoJS.AES.encrypt(data, secretKey).toString();

@@ -1,11 +1,12 @@
 {
-  "name": "映航useflow",
+  "name": "useflow",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "electron-dev": "electron .",
+    "electron-build": "electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -43,7 +44,6 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@import-meta-env/unplugin": "^0.5.2",
     "@types/react": "^18.3.4",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^6.20.0",
@@ -63,19 +63,38 @@
   },
   "main": "main.js",
   "build": {
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://gitee.com/jinhua-rock/useflow-release/raw/master/latest"
+      }
+    ],
     "appId": "useflow",
-    "productName": "useflow",
+    "productName": "映航useflow",
     "files": [
-      "dist/**/*"
+      {
+        "from": "dist/",
+        "to": "dist/",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "dist/node_modules",
+        "to": "dist/node_modules"
+      },
+      "main.js",
+      "package.json",
+      "!node_modules/**"
     ],
     "directories": {
-      "buildResources": "assets"
+      "output": "electron"
     },
     "win": {
-      "icon": "assets/icon.ico"
+      "icon": "public/favicon.ico"
     },
     "mac": {
-      "icon": "assets/icon.icns"
+      "icon": "public/favicon.icns"
     },
     "dmg": {
       "contents": [
