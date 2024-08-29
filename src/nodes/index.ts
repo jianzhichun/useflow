@@ -10,6 +10,7 @@ import { VideoRender } from './VideoRender';
 import { BodySegmentation } from './BodySegmentation';
 import { HandPoseDetection } from './HandPoseDetection';
 import { HandPoseValidator } from './HandPoseValidator';
+import { DingTalkRobot } from './DingTalkRobot';
 
 export const initialNodes: AppNode[] = [];
 export const nodeTypes = {
@@ -107,6 +108,16 @@ export const nodeTypes = {
           type: 'pose',
           drawKeypoints: true,
           drawSkeleton: true
+        }]
+      }
+    }
+  }),
+  'dingtalk-robot': Object.assign(DingTalkRobot, {
+    defaultData() {
+      return {
+        label: '钉钉机器人',
+        msgs:[{
+          type: 'score'
         }]
       }
     }

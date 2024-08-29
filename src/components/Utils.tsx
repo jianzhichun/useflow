@@ -1,3 +1,13 @@
+import CryptoJS from 'crypto-js';
+const secretKey = import.meta.env.SECRET_KEY;
+
+export function encrypt(data: string) {
+  return CryptoJS.AES.encrypt(data, secretKey).toString();
+}
+export function decrypt(encrypted: string) {
+  const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+  return bytes.toString(CryptoJS.enc.Utf8);
+}
 export function customThrottle<T>(
     fn: (...args: any[]) => T,
     delay: number,

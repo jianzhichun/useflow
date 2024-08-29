@@ -9,5 +9,6 @@ export type HandPoseDetection = Node<any, 'hand-pose-detection'>;
 export type ActionArrangement = Node<any, 'action-arrangement'>;
 export type VideoRender = Node<any, 'video-render'>;
 export type Log = Node<any, 'log'>;
+export type DingTalkRobot = Node<any, 'dingtalk-robot'>;
 
 export type AppNode = BuiltInNode | CameraInput;

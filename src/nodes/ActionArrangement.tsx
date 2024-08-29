@@ -152,7 +152,6 @@ export function ActionArrangement({ id, selected, data }: NodeProps<ActionArrang
             {() => <>
                 <UseHandle output={[{ id: 'frame', label: '信息帧' }]} />
                 <Form
-                    
                     form={form}
                     initialValues={data}
                     autoComplete="off"

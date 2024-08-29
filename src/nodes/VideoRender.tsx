@@ -216,7 +216,7 @@ export function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any)
                             <Form.Item {...restField} className="nodrag nopan" name={[idx, "drawState"]} label="绘制状态">
                                 <Switch />
                             </Form.Item>
-                            <Form.Item {...restField} className="nodrag nopan" name={[idx, "drawScore"]} label="绘制分数">
+                            <Form.Item {...restField} className="nodrag nopan" name={[idx, "drawScore"]} label="绘制得分">
                                 <Switch />
                             </Form.Item>
                             <Form.Item {...restField} className="nodrag nopan" name={[idx, "drawRemainTime"]} label="绘制倒计时">

@@ -5,6 +5,7 @@ import { mediapipe } from 'vite-plugin-mediapipe';
 import clean from 'vite-plugin-clean';
 import { createHtmlPlugin } from 'vite-plugin-html';
 import fs from 'fs';
+import importMetaEnv from "@import-meta-env/unplugin";
 
 const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
 
@@ -33,6 +34,9 @@ export default defineConfig({
       ]
     }),
     react(),
+    importMetaEnv.vite({
+      example: '.env'
+    }),
     createHtmlPlugin({
       inject: {
         data: {

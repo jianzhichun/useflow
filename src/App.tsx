@@ -13,7 +13,7 @@ import {
   useUpdateNodeInternals,
   Edge
 } from '@xyflow/react';
-import { Button, Flex, Switch, ConfigProvider, theme } from 'antd';
+import { Button, Flex, Switch, ConfigProvider, theme, Modal, Form, Input } from 'antd';
 import '@xyflow/react/dist/style.css';
 import { nanoid } from 'nanoid';
 import { initialNodes, nodeTypes } from './nodes';
@@ -23,6 +23,9 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { Tensor } from '@tensorflow/tfjs-core';
 import { MoonOutlined, SunOutlined } from '@ant-design/icons';
+import { useLocalStorageState } from 'ahooks';
+import { useForm } from 'antd/es/form/Form';
+import { decrypt } from './components/Utils';
 
 interface RuntimeNodeState {
   edges: Edge[],
@@ -151,16 +154,48 @@ export default function App() {
   }, []);
   useEffect(() => {
 
-  ConfigProvider.config({
-    holderRender: (children) => (
-      <ConfigProvider
-        theme={{ algorithm: [isDark ? theme.darkAlgorithm : theme.defaultAlgorithm, theme.compactAlgorithm] }}
-      >
-        {children}
-      </ConfigProvider>
-    ),
-  });
+    ConfigProvider.config({
+      holderRender: (children) => (
+        <ConfigProvider
+          theme={{ algorithm: [isDark ? theme.darkAlgorithm : theme.defaultAlgorithm, theme.compactAlgorithm] }}
+        >
+          {children}
+        </ConfigProvider>
+      ),
+    });
   }, [isDark]);
+  const [license, setLicense] = useLocalStorageState<string>("license");
+  const [form] = useForm();
+  if (!license) {
+    return <Modal
+      title="请输入序列号"
+      onOk={() => form.submit()}
+      okText="确认"
+      cancelText="取消"
+      open={true}
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={({ license }: any) => {
+          setLicense(license);
+        }}
+      >
+        <Form.Item
+          name="license"
+          rules={[{ required: true, message: '请输入序列号!' }]}
+        >
+          <Input placeholder="请输入序列号" />
+        </Form.Item>
+      </Form>
+    </Modal>
+  } else {
+    const lasttime = new Date(decrypt(license));
+    if (isNaN(lasttime.getTime()) || lasttime.getTime() < Date.now()) {
+      setLicense("");
+      location.reload();
+    }
+  }
   return (
     <>
       <ConfigProvider componentSize='small' theme={{ algorithm: [isDark ? theme.darkAlgorithm : theme.defaultAlgorithm, theme.compactAlgorithm] }}>
