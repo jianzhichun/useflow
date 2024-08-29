@@ -1,8 +1,8 @@
 import type { NodeDefault } from '../../types'
-import type { VideoNodeType } from './types'
+import type { CameraNodeType } from './types'
 import { ALL_AVAILABLE_BLOCKS } from '@/app/components/workflow/constants'
 
-const nodeDefault: NodeDefault<VideoNodeType> = {
+const nodeDefault: NodeDefault<CameraNodeType> = {
   defaultValue: {
     // variables: [],
   },

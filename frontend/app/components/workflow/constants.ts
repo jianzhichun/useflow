@@ -74,8 +74,8 @@ export const NODES_INITIAL_DATA: Record<BlockEnum, {
   },
   [BlockEnum.CameraInput]: {
     type: BlockEnum.CameraInput,
-    title: '输入视频流',
-    desc: '',
+    title: '摄像头输入',
+    desc: '获取摄像头的实时画面输入',
   },
   [BlockEnum.End]: {
     type: BlockEnum.End,

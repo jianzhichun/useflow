@@ -49,7 +49,7 @@ const AddBlock = ({
       handlePaneContextmenuCancel()
   }, [handlePaneContextmenuCancel])
 
-  const handleSelect = useCallback<OnSelectBlock>((type: BlockEnum, toolDefaultValue?: ToolDefaultValue) => {
+  const handleSelect = useCallback<OnSelectBlock>((type, toolDefaultValue) => {
     const {
       getNodes,
     } = store.getState()
@@ -91,7 +91,6 @@ const AddBlock = ({
     <BlockSelector
       open={open}
       onOpenChange={handleOpenChange}
-      disabled={false}
       onSelect={handleSelect}
       placement='top-start'
       offset={offset ?? {

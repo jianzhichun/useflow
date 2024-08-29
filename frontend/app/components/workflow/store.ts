@@ -23,8 +23,10 @@ type Shape = {
     left: number
   }
   setPanelMenu: (panelMenu: Shape['panelMenu']) => void;
-  candidateNode?: Node
-  setCandidateNode: (candidateNode?: Node) => void
+  candidateNode?: Node;
+  setCandidateNode: (candidateNode?: Node) => void;
+  mousePosition: { pageX: number; pageY: number; elementX: number; elementY: number }
+  setMousePosition: (mousePosition: Shape['mousePosition']) => void
 }
 
 export const createWorkflowStore = () => {
@@ -33,6 +35,8 @@ export const createWorkflowStore = () => {
     setPanelMenu: panelMenu => set(() => ({ panelMenu })),
     candidateNode: undefined,
     setCandidateNode: candidateNode => set(() => ({ candidateNode })),
+    mousePosition: { pageX: 0, pageY: 0, elementX: 0, elementY: 0 },
+    setMousePosition: mousePosition => set(() => ({ mousePosition })),
   }))
 }
 

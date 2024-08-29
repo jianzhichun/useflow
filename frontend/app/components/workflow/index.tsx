@@ -18,7 +18,7 @@ import {
   useNodesInteractions,
   usePanelInteractions,
 } from "./hooks";
-import { initialEdges, initialNodes } from "./utils";
+import { initialEdges, initialNodes, isEventTargetInputArea } from "./utils";
 import Loading from "@/app/components/base/loading";
 import { WorkflowHistoryProvider } from "./workflow-history-store";
 import { WorkflowContextProvider } from "./context";
@@ -26,9 +26,12 @@ import { CUSTOM_NODE, WORKFLOW_DATA_UPDATE } from "./constants";
 import CustomNode from "./nodes";
 import CustomEdge from "./custom-edge";
 import PanelContextmenu from "./panel-contextmenu";
+import CandidateNode from "./candidate-node";
 import { useEventEmitterContextContext } from "@/context/event-emitter";
 import Panel from "./panel";
 import { useWorkflowUpdate } from "./hooks/use-workflow-interactions";
+import { useEventListener, useKeyPress } from "ahooks";
+import { useWorkflowStore } from "./store";
 
 type WorkflowProps = {
   nodes: Node[];
@@ -51,6 +54,7 @@ const Workflow: FC<WorkflowProps> = memo(
     const [edges, setEdges] = useEdgesState(originalEdges);
     const reactflow = useReactFlow();
     const { eventEmitter } = useEventEmitterContextContext();
+    const workflowStore = useWorkflowStore();
 
     eventEmitter?.useSubscription((v: any) => {
       if (v.type === WORKFLOW_DATA_UPDATE) {
@@ -60,6 +64,31 @@ const Workflow: FC<WorkflowProps> = memo(
         if (v.payload.viewport) {
           reactflow.setViewport(v.payload.viewport);
         }
+      }
+    });
+
+    useEventListener("keydown", (e) => {
+      if ((e.key === "d" || e.key === "D") && (e.ctrlKey || e.metaKey))
+        e.preventDefault();
+      if ((e.key === "z" || e.key === "Z") && (e.ctrlKey || e.metaKey))
+        e.preventDefault();
+      if ((e.key === "y" || e.key === "Y") && (e.ctrlKey || e.metaKey))
+        e.preventDefault();
+      if ((e.key === "s" || e.key === "S") && (e.ctrlKey || e.metaKey))
+        e.preventDefault();
+    });
+    useEventListener("mousemove", (e) => {
+      const containerClientRect =
+        workflowContainerRef.current?.getBoundingClientRect();
+      if (containerClientRect) {
+        workflowStore.setState({
+          mousePosition: {
+            pageX: e.clientX,
+            pageY: e.clientY,
+            elementX: e.clientX - containerClientRect.left,
+            elementY: e.clientY - containerClientRect.top,
+          },
+        });
       }
     });
 
@@ -74,12 +103,23 @@ const Workflow: FC<WorkflowProps> = memo(
       handleNodeConnectStart,
       handleNodeConnectEnd,
       handleNodeContextMenu,
+      handleNodesCopy,
+      handleNodesPaste,
+      handleNodesDuplicate,
+      handleNodesDelete,
+      handleHistoryBack,
+      handleHistoryForward,
     } = useNodesInteractions();
 
     const {
       handlePaneContextMenu,
       // handlePaneContextmenuCancel,
     } = usePanelInteractions();
+
+    useKeyPress(["delete", "backspace"], (e) => {
+      if (isEventTargetInputArea(e.target as HTMLElement)) return;
+      handleNodesDelete();
+    });
 
     return (
       <div
@@ -89,7 +129,8 @@ const Workflow: FC<WorkflowProps> = memo(
       `}
         ref={workflowContainerRef}
       >
-        {/* <Panel /> */}
+        <CandidateNode />
+        <Panel />
         <PanelContextmenu />
         <ReactFlow
           nodeTypes={nodeTypes}

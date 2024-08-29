@@ -1,6 +1,6 @@
 import type { FC, ReactElement } from "react";
 import { cloneElement, memo, useEffect, useRef } from "react";
-import { BlockEnum, type NodeProps } from "../../types";
+import { type NodeProps } from "../../types";
 import cn from "@/utils/classnames";
 import { useNodeIterationInteractions } from "../iteration/use-interactions";
 import { NodeSourceHandle, NodeTargetHandle } from "./components/node-handle";
@@ -82,13 +82,13 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
           >
             {data.title}
           </div>
-          {cloneElement(children, { id, data })}
-          {data.desc && (
-            <div className="px-3 pt-1 pb-2 system-xs-regular text-text-tertiary whitespace-pre-line break-words">
-              {data.desc}
-            </div>
-          )}
         </div>
+        {data.desc && (
+          <div className="px-3 pt-1 pb-2 system-xs-regular text-text-tertiary whitespace-pre-line break-words">
+            {data.desc}
+          </div>
+        )}
+        {cloneElement(children, { id, data })}
       </div>
     </div>
   );

@@ -275,3 +275,11 @@ export const getNodesConnectedSourceOrTargetHandleIdsMap = (changes: ConnectedSo
 
   return nodesConnectedSourceOrTargetHandleIdsMap
 }
+
+export const isEventTargetInputArea = (target: HTMLElement) => {
+  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')
+    return true
+
+  if (target.contentEditable === 'true')
+    return true
+}

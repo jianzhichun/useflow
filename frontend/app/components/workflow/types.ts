@@ -124,6 +124,11 @@ export type SelectedNode = Pick<Node, 'id' | 'data'>
 
 export type NodeProps<T = unknown> = { id: string; data: CommonNodeType<T> }
 
+export type NodePanelProps<T> = {
+  id: string
+  data: CommonNodeType<T>
+}
+
 export type WorkflowDataUpdator = {
   nodes: Node[]
   edges: Edge[]
