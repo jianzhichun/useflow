@@ -3,6 +3,7 @@ import * as posedetection from '@tensorflow-models/pose-detection';
 import '@mediapipe/pose';
 import { useTfjs } from './Tfjs';
 import { useDeepCompareEffect } from 'ahooks';
+import { ModelHolder } from './Constant';
 
 type Config = posedetection.PosenetModelConfig | posedetection.BlazePoseTfjsModelConfig | posedetection.BlazePoseMediaPipeModelConfig | posedetection.MoveNetModelConfig | undefined;
 
@@ -68,41 +69,39 @@ export function drawSkeleton(ctx: CanvasRenderingContext2D, keypoints: posedetec
     });
 }
 class PoseDetectorSingleton {
-    private static promiseInstances: Map<string, Promise<posedetection.PoseDetector>> = new Map();
-    private static creating = false;
     private constructor() { }
     public static async getInstance(model: posedetection.SupportedModels, config: Config): Promise<posedetection.PoseDetector> {
         const key = `${model}_${JSON.stringify(config)}`;
-        if (!PoseDetectorSingleton.promiseInstances.has(key)) {
+        if (!ModelHolder.poseDetectorPromises.has(key)) {
             const detectorPromise = new Promise<posedetection.PoseDetector>(async (resolve, reject) => {
-                if (PoseDetectorSingleton.promiseInstances.has(key)) {
-                    resolve(PoseDetectorSingleton.promiseInstances.get(key)!);
+                if (ModelHolder.poseDetectorPromises.has(key)) {
+                    resolve(ModelHolder.poseDetectorPromises.get(key)!);
                 } else {
-                    if (PoseDetectorSingleton.creating) {
-                        while (PoseDetectorSingleton.creating) {
+                    if (ModelHolder.creating) {
+                        while (ModelHolder.creating) {
                             await new Promise(resolve => setTimeout(resolve, 100));
                         }
                     }
                     try {
-                        PoseDetectorSingleton.creating = true;
+                        ModelHolder.creating = true;
                         const detector = await posedetection.createDetector(model, config);
-                        PoseDetectorSingleton.creating = false;
+                        ModelHolder.creating = false;
                         resolve(detector);
                     } catch (error) {
                         reject(error);
                     }
                 }
             });
-            PoseDetectorSingleton.promiseInstances.set(key, detectorPromise);
+            ModelHolder.poseDetectorPromises.set(key, detectorPromise);
         }
-        return PoseDetectorSingleton.promiseInstances.get(key)!;
+        return ModelHolder.poseDetectorPromises.get(key)!;
     }
     public static async disposeInstance(model: posedetection.SupportedModels, config: Config) {
         const key = `${model}_${JSON.stringify(config)}`;
-        const detector = await this.promiseInstances.get(key);
+        const detector = await ModelHolder.poseDetectorPromises.get(key);
         if (detector) {
             detector.dispose();
-            this.promiseInstances.delete(key);
+            ModelHolder.poseDetectorPromises.delete(key);
         }
     }
 }
@@ -119,7 +118,6 @@ export const usePoseDetector = (model: posedetection.SupportedModels = posedetec
         let isMounted = true;
         if (tf) {
             console.log('Loading pose detector...', config);
-            // const backend = tf.getBackend();
             PoseDetectorSingleton.getInstance(model, config).then(detector => {
                 if (isMounted) {
                     detectorRef.current = detector;

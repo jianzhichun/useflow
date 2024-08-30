@@ -1,5 +1,5 @@
 import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
-import { type HandPoseDetection } from './types';
+import type { Node } from '@xyflow/react';
 import { useEffect } from 'react';
 import UseHandle from '../components/UseHandle';
 import { useRuntimeNodeStore } from '../App';
@@ -11,7 +11,7 @@ import { useForm } from 'antd/es/form/Form';
 import { useHandPoseDetector } from '../components/HandPoseDetector';
 import { SupportedModels } from '@tensorflow-models/hand-pose-detection';
 
-export function HandPoseDetection({ id, selected, data }: NodeProps<HandPoseDetection>) {
+export function HandPoseDetection({ id, selected, data }: NodeProps<Node<any, 'hand-pose-detection'>>) {
     const setRuntimeNodeData = useRuntimeNodeStore(state => (nodeData: any) => state.set(id, nodeData));
     const [form] = useForm();
     const updateNodeInternals = useUpdateNodeInternals();

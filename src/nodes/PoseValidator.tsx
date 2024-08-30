@@ -1,5 +1,5 @@
 import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
-import { type PoseValidator } from './types';
+import type { Node } from '@xyflow/react';
 import { useRuntimeNodeStore } from '../App';
 import { useEffect, useRef, useState } from 'react';
 import { Upload, Image as AntdImage, Form, Slider, Select, Popover, Space, Button, Flex, InputNumber, message } from 'antd';
@@ -632,7 +632,7 @@ function Score({ nodeId, scoreAlgorithm, poseScoreThreshold }: any) {
     return score.current && score.current.toFixed(1);
 }
 
-export function PoseValidator({ id, selected, data }: NodeProps<PoseValidator>) {
+export function PoseValidator({ id, selected, data }: NodeProps<Node<any, 'pose-validator'>>) {
     const [configVisible, setConfigVisible] = useState(false);
     const [poseCaptureThresholdVisible, setPoseCaptureThresholdVisible] = useState(false);
     const detector = usePoseDetector();

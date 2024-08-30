@@ -1,6 +1,6 @@
 {
   "name": "useflow",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -34,6 +34,7 @@
     "katex": "^0.16.11",
     "lodash": "^4.17.21",
     "lodash.clamp": "^4.0.3",
+    "moment": "^2.30.1",
     "nanoid": "^5.0.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -51,6 +52,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "electron": "^32.0.1",
     "electron-builder": "^24.13.3",
+    "electron-updater": "^6.2.1",
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
@@ -66,11 +68,11 @@
     "publish": [
       {
         "provider": "generic",
-        "url": "https://gitee.com/jinhua-rock/useflow-release/raw/master/latest"
+        "url": "https://cdn.jinhuayanshi.cn/useflow"
       }
     ],
     "appId": "useflow",
-    "productName": "映航useflow",
+    "productName": "岩石useflow",
     "files": [
       {
         "from": "dist/",
@@ -94,7 +96,15 @@
       "icon": "public/favicon.ico"
     },
     "mac": {
-      "icon": "public/favicon.icns"
+      "icon": "public/favicon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ]
     },
     "dmg": {
       "contents": [

@@ -1,5 +1,5 @@
 import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
-import { type DingTalkRobot } from './types';
+import type { Node } from '@xyflow/react';
 import { useRuntimeNodeStore } from '../App';
 import ResizableNode from '../components/ResizableNode';
 import { Button, Flex, Form, Input, Select, Space } from 'antd';
@@ -151,7 +151,7 @@ function Msg({ obj, secret, webhook, nodeId, idx, restField, remove }: any) {
         </>}
     </Flex>;
 }
-export function DingTalkRobot({ id, selected, data }: NodeProps<DingTalkRobot>) {
+export function DingTalkRobot({ id, selected, data }: NodeProps<Node<any, 'dingtalk-robot'>>) {
     const [form] = useForm();
     const updateNodeInternals = useUpdateNodeInternals();
     return (

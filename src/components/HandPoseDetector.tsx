@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { useTfjs } from './Tfjs';
 import { useDeepCompareEffect } from 'ahooks';
 import { Keypoint } from '@tensorflow-models/hand-pose-detection';
+import { ModelHolder } from './Constant';
 
 type Config = handPoseDetection.MediaPipeHandsMediaPipeModelConfig | handPoseDetection.MediaPipeHandsTfjsModelConfig;
 
@@ -61,41 +62,39 @@ function drawPath(ctx: CanvasRenderingContext2D, points: Keypoint[], closePath: 
 }
 
 class HandPoseDetectorSingleton {
-    private static promiseInstances: Map<string, Promise<handPoseDetection.HandDetector>> = new Map();
-    private static creating = false;
     private constructor() { }
     public static async getInstance(model: handPoseDetection.SupportedModels, config: Config): Promise<handPoseDetection.HandDetector> {
         const key = `${model}_${JSON.stringify(config)}`;
-        if (!HandPoseDetectorSingleton.promiseInstances.has(key)) {
+        if (!ModelHolder.handDetectorPromises.has(key)) {
             const detectorPromise = new Promise<handPoseDetection.HandDetector>(async (resolve, reject) => {
-                if (HandPoseDetectorSingleton.promiseInstances.has(key)) {
-                    resolve(HandPoseDetectorSingleton.promiseInstances.get(key)!);
+                if (ModelHolder.handDetectorPromises.has(key)) {
+                    resolve(ModelHolder.handDetectorPromises.get(key)!);
                 } else {
-                    if (HandPoseDetectorSingleton.creating) {
-                        while (HandPoseDetectorSingleton.creating) {
+                    if (ModelHolder.creating) {
+                        while (ModelHolder.creating) {
                             await new Promise(resolve => setTimeout(resolve, 100));
                         }
                     }
                     try {
-                        HandPoseDetectorSingleton.creating = true;
+                        ModelHolder.creating = true;
                         const detector = await handPoseDetection.createDetector(model, config);
-                        HandPoseDetectorSingleton.creating = false;
+                        ModelHolder.creating = false;
                         resolve(detector);
                     } catch (error) {
                         reject(error);
                     }
                 }
             });
-            HandPoseDetectorSingleton.promiseInstances.set(key, detectorPromise);
+            ModelHolder.handDetectorPromises.set(key, detectorPromise);
         }
-        return HandPoseDetectorSingleton.promiseInstances.get(key)!;
+        return ModelHolder.handDetectorPromises.get(key)!;
     }
     public static async disposeInstance(model: handPoseDetection.SupportedModels, config: Config) {
         const key = `${model}_${JSON.stringify(config)}`;
-        const detector = await this.promiseInstances.get(key);
+        const detector = await ModelHolder.handDetectorPromises.get(key);
         if (detector) {
             detector.dispose();
-            this.promiseInstances.delete(key);
+            ModelHolder.handDetectorPromises.delete(key);
         }
     }
 }

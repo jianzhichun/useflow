@@ -1,5 +1,5 @@
 import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
-import { type PoseDetection } from './types';
+import type { Node } from '@xyflow/react';
 import { useEffect } from 'react';
 import UseHandle from '../components/UseHandle';
 import { useRuntimeNodeStore } from '../App';
@@ -11,7 +11,7 @@ import { Form, Select } from 'antd';
 import { useForm } from 'antd/es/form/Form';
 import { SupportedModels } from '@tensorflow-models/pose-detection';
 
-export function PoseDetection({ id, selected, data }: NodeProps<PoseDetection>) {
+export function PoseDetection({ id, selected, data }: NodeProps<Node<any, 'pose-detection'>>) {
     const setRuntimeNodeData = useRuntimeNodeStore(state => (nodeData: any) => state.set(id, nodeData));
     const [form] = useForm();
     const updateNodeInternals = useUpdateNodeInternals();

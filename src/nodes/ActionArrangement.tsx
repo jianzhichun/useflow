@@ -1,7 +1,6 @@
 import { NodeProps, useUpdateNodeInternals } from "@xyflow/react";
 import { useRuntimeNodeStore } from "../App";
 import UseHandle from "../components/UseHandle";
-import { type ActionArrangement } from './types';
 import { useForm } from "antd/es/form/Form";
 import { Button, Flex, Form, Input, InputNumber, Select, Space } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
@@ -9,6 +8,8 @@ import { useEffect, useState } from "react";
 import { isEqual } from "lodash";
 import "./ActionArrangement.css"
 import ResizableNode from "../components/ResizableNode";
+import type { Node } from '@xyflow/react';
+
 export function PoseFrame({ nodeId, idx, restField, remove, frames }: any) {
     const [configVisible, setConfigVisible] = useState(false);
     const frame = useRuntimeNodeStore((state) => state.get(nodeId, 'frame'));
@@ -22,7 +23,7 @@ export function PoseFrame({ nodeId, idx, restField, remove, frames }: any) {
         <UseHandle input={[{
             id: `score${idx}`, label: <>
                 得分{idx + 1}
-                <Button onClick={() => setConfigVisible(old => !old)}  type="link">
+                <Button onClick={() => setConfigVisible(old => !old)} type="link">
                     配置
                 </Button>
             </>
@@ -80,7 +81,7 @@ function formatScore(scoreFormat: string, score: number) {
             return score.toFixed(2);
     }
 }
-export function ActionArrangement({ id, selected, data }: NodeProps<ActionArrangement>) {
+export function ActionArrangement({ id, selected, data }: NodeProps<Node<any, 'action-arrangement'>>) {
     const [form] = useForm();
     const updateNodeInternals = useUpdateNodeInternals();
     const setRuntimeNodeData = useRuntimeNodeStore((state) => (nodeData: any) => state.set(id, nodeData));
@@ -170,7 +171,7 @@ export function ActionArrangement({ id, selected, data }: NodeProps<ActionArrang
                                     <Button type="dashed" className="nopan" block icon={<PlusOutlined />} onClick={() => add({
                                         wait: 3,
                                         waitStrategy: 'condition_next',
-                                        name: `姿势${fields.length + 1}`,
+                                        name: `行为${fields.length + 1}`,
                                         minScore: 85,
                                         rollback: fields.length - 1,
                                         scoreFormat: 'percentage'

@@ -1,5 +1,5 @@
 import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
-import { type CameraInput } from './types';
+import type { Node } from '@xyflow/react';
 import { useEffect, useState } from 'react';
 import { Select, Form, Switch } from 'antd';
 import UseHandle from '../components/UseHandle';
@@ -8,7 +8,7 @@ import { useTfjs } from '../components/Tfjs';
 import ResizableNode from '../components/ResizableNode';
 import { useForm } from 'antd/es/form/Form';
 
-export function CameraInput({ id, selected, data }: NodeProps<CameraInput>) {
+export function CameraInput({ id, selected, data }: NodeProps<Node<any, 'camera-input'>>) {
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const updateNodeInternals = useUpdateNodeInternals();
   const setRuntimeNodeData = useRuntimeNodeStore(state => (nodeData: any) => state.set(id, nodeData));

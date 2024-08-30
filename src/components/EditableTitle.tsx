@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, CSSProperties } from 'react';
 import { Input } from 'antd';
 
 interface EditableTitleProps {
   title: string;
   onChange: (newTitle: string) => void;
+  style?: CSSProperties;
+  className?: string;
 }
 
-const EditableTitle: React.FC<EditableTitleProps> = ({ title: initialTitle, onChange }) => {
+const EditableTitle: React.FC<EditableTitleProps> = ({ title: initialTitle, onChange, style, className }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(initialTitle);
 
@@ -34,7 +36,7 @@ const EditableTitle: React.FC<EditableTitleProps> = ({ title: initialTitle, onCh
     }
   };
   return (
-    <div>
+    <span>
       {isEditing ? (
         <Input
           size='small'
@@ -45,11 +47,11 @@ const EditableTitle: React.FC<EditableTitleProps> = ({ title: initialTitle, onCh
           autoFocus
         />
       ) : (
-        <div onClick={handleEdit} className="nopan" style={{ minHeight: '16px', cursor: 'pointer' }}>
+        <span onClick={handleEdit} className={`${className} nopan`} style={{ ...style, lineHeight: '23px', cursor: 'pointer' }}>
           {title}
-        </div>
+        </span>
       )}
-    </div>
+    </span>
   );
 };
 

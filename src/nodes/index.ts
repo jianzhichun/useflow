@@ -2,7 +2,6 @@ import type { NodeTypes } from '@xyflow/react';
 
 import { CameraInput } from './CameraInput';
 import { PoseDetection } from './PoseDetection';
-import { AppNode } from './types';
 import { PoseValidator } from './PoseValidator';
 import { ActionArrangement } from './ActionArrangement';
 import { Log } from './Log';
@@ -12,9 +11,9 @@ import { HandPoseDetection } from './HandPoseDetection';
 import { HandPoseValidator } from './HandPoseValidator';
 import { DingTalkRobot } from './DingTalkRobot';
 
-export const initialNodes: AppNode[] = [];
 export const nodeTypes = {
   'camera-input': Object.assign(CameraInput, {
+    category: "流式输入输出",
     defaultData() {
       return {
         label: '摄像头输入',
@@ -22,6 +21,7 @@ export const nodeTypes = {
     }
   }),
   'body-segmentation': Object.assign(BodySegmentation, {
+    category: "流式输入输出",
     defaultData() {
       return {
         label: '人像分割',
@@ -30,6 +30,7 @@ export const nodeTypes = {
     }
   }),
   'pose-detection': Object.assign(PoseDetection, {
+    category: "动作识别",
     defaultData() {
       return {
         label: '姿势识别',
@@ -38,6 +39,7 @@ export const nodeTypes = {
     }
   }),
   'pose-validator': Object.assign(PoseValidator, {
+    category: "动作识别",
     defaultData() {
       return {
         label: '姿势校验',
@@ -58,6 +60,7 @@ export const nodeTypes = {
     }
   }),
   'hand-pose-detection': Object.assign(HandPoseDetection, {
+    category: "动作识别",
     defaultData() {
       return {
         label: '手势识别',
@@ -66,6 +69,7 @@ export const nodeTypes = {
     }
   }),
   'hand-pose-validator': Object.assign(HandPoseValidator, {
+    category: "动作识别",
     defaultData() {
       return {
         label: '手势校验',
@@ -86,6 +90,7 @@ export const nodeTypes = {
     }
   }),
   'action-arrangement': Object.assign(ActionArrangement, {
+    category: "编排",
     defaultData() {
       return {
         label: '行为编排',
@@ -101,6 +106,7 @@ export const nodeTypes = {
     }
   }),
   'video-render': Object.assign(VideoRender, {
+    category: "流式输入输出",
     defaultData() {
       return {
         label: '视频渲染',
@@ -113,6 +119,7 @@ export const nodeTypes = {
     }
   }),
   'dingtalk-robot': Object.assign(DingTalkRobot, {
+    category: "预警和通知",
     defaultData() {
       return {
         label: '钉钉机器人',

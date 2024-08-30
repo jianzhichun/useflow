@@ -44,6 +44,11 @@ span {
   align-items: center;
 }
 
-.react-flow__panel.react-flow__attribution.bottom.right {
+.react-flow__panel.react-flow__attribution.bottom.right > a {
   display: none;
+}
+
+.title-with-manager:hover {
+  border: dashed 1px var(--xy-node-color, var(--xy-connectionline-stroke-default));
+  padding: 3px;
 }

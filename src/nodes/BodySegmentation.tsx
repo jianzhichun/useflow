@@ -1,5 +1,4 @@
 import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
-import { type PoseDetection } from './types';
 import { useEffect } from 'react';
 import UseHandle from '../components/UseHandle';
 import { useRuntimeNodeStore } from '../App';
@@ -11,8 +10,9 @@ import { useForm } from 'antd/es/form/Form';
 import { useBodySegmenter } from '../components/BodySegmenter';
 import { SupportedModels } from '@tensorflow-models/body-segmentation';
 import { useTfjs } from '../components/Tfjs';
+import type { Node } from '@xyflow/react';
 
-export function BodySegmentation({ id, selected, data }: NodeProps<PoseDetection>) {
+export function BodySegmentation({ id, selected, data }: NodeProps<Node<any, 'body-segmentation'>>) {
     const setRuntimeNodeData = useRuntimeNodeStore(state => (nodeData: any) => state.set(id, nodeData));
     const [form] = useForm();
     const tf = useTfjs();

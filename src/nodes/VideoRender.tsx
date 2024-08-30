@@ -1,5 +1,5 @@
 import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
-import { type VideoRender } from './types';
+import type { Node } from '@xyflow/react';
 import UseHandle from '../components/UseHandle';
 import { useRuntimeNodeStore } from '../App';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -249,7 +249,7 @@ export function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any)
         })()}
     </Flex>;
 }
-export function VideoRender({ id, selected, data }: NodeProps<VideoRender>) {
+export function VideoRender({ id, selected, data }: NodeProps<Node<any, 'video-render'>>) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const tf = useTfjs();
     const [form] = useForm();
