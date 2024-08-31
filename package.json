@@ -71,7 +71,8 @@
       {
         "provider": "github",
         "owner": "jianzhichun",
-        "repo": "useflow-release"
+        "repo": "useflow-release",
+        "releaseType": "release" 
       }
     ],
     "appId": "useflow",
@@ -116,20 +117,5 @@
         }
       ]
     }
-  },
-  "release-it": {
-    "git": {
-      "tagName": "v${version}",
-      "commitMessage": "Release v${version}"
-    },
-    "github": {
-      "release": true,
-      "assets": [
-        "electron/*.exe",
-        "electron/*.dmg"
-      ],
-      "repo": "jianzhichun/useflow-release"
-    },
-    "npm": false
   }
 }
