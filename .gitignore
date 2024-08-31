@@ -27,3 +27,4 @@ pnpm-lock.yaml
 package-lock.json
 .env
 electron
+yarn.lock

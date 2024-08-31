@@ -2,7 +2,9 @@ import { app, BrowserWindow, Menu, dialog } from 'electron';
 import * as path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import electronUpdater from 'electron-updater';
 
+const { autoUpdater } = electronUpdater;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 let mainWindow;
@@ -49,10 +51,43 @@ function createWindow() {
                             buttons: ['确定']
                         });
                     }
+                },
+                {
+                    label: '检查更新',
+                    click: () => {
+                        autoUpdater.checkForUpdates();
+                    }
                 }
             ]
         }
     ]));
+    autoUpdater.on('update-available', (info) => {
+        dialog.showMessageBox({
+            type: 'info',
+            title: '更新可用',
+            message: '有新版本可用，正在下载...'
+        });
+    });
+    autoUpdater.on('update-downloaded', (info) => {
+        dialog.showMessageBox({
+            type: 'info',
+            title: '更新下载完成',
+            message: '更新已下载完成，应用程序将重启以应用更新。'
+        }).then(() => {
+            autoUpdater.quitAndInstall();
+        });
+    });
+    autoUpdater.on('update-not-available', (info) => {
+        dialog.showMessageBox({
+            type: 'info',
+            title: '没有可用更新',
+            message: '当前版本已是最新版本。'
+        });
+    });
+    autoUpdater.on('error', (err) => {
+        log.error('更新错误:', err);
+        dialog.showErrorBox('更新错误', err == null ? "unknown" : (err.stack || err).toString());
+    });
 }
 
 app.whenReady().then(createWindow);
