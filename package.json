@@ -15,7 +15,7 @@
   "dependencies": {
     "electron-updater": "^6.3.0-alpha.6"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "devDependencies": {
     "@ant-design/icons": "^5.4.0",
     "@mediapipe/hands": "^0.4.1675469240",
@@ -56,7 +56,6 @@
     "react-dom": "^18.2.0",
     "react-markdown": "^9.0.1",
     "rehype-katex": "^7.0.1",
-    "release-it": "^17.6.0",
     "remark-math": "^6.0.0",
     "typescript": "^5.5.4",
     "vite": "^5.0.12",

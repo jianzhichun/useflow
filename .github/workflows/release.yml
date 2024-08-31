@@ -21,8 +21,7 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Build Electron app
+      - name: Build and Publish
         run: yarn package
-
-      - name: Release Electron app
-        run: yarn releaseit  
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
