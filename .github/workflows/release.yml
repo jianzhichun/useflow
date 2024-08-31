@@ -24,11 +24,5 @@ jobs:
       - name: Build Electron app
         run: yarn package
 
-      - name: Upload release assets
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            electron/*.exe
-            electron/*.dmg
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Release Electron app
+        run: yarn releaseit  

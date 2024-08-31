@@ -8,6 +8,7 @@
     "electron-dev": "electron .",
     "electron-build": "electron-builder",
     "package": "yarn && vite build && electron-builder",
+    "releaseit": "release-it",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -55,6 +56,7 @@
     "react-dom": "^18.2.0",
     "react-markdown": "^9.0.1",
     "rehype-katex": "^7.0.1",
+    "release-it": "^17.6.0",
     "remark-math": "^6.0.0",
     "typescript": "^5.5.4",
     "vite": "^5.0.12",
@@ -115,5 +117,20 @@
         }
       ]
     }
+  },
+  "release-it": {
+    "git": {
+      "tagName": "v${version}",
+      "commitMessage": "Release v${version}"
+    },
+    "github": {
+      "release": true,
+      "assets": [
+        "electron/*.exe",
+        "electron/*.dmg"
+      ],
+      "repo": "jianzhichun/useflow-release"
+    },
+    "npm": false
   }
 }
