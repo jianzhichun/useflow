@@ -62,6 +62,7 @@ function createWindow() {
         }
     ]));
     autoUpdater.on('update-available', (info) => {
+        autoUpdater.downloadUpdate();
         dialog.showMessageBox({
             type: 'info',
             title: '更新可用',
