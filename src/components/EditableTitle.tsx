@@ -48,7 +48,7 @@ const EditableTitle: React.FC<EditableTitleProps> = ({ title: initialTitle, onCh
         />
       ) : (
         <span onClick={handleEdit} className={`${className} nopan`} style={{ ...style, lineHeight: '23px', cursor: 'pointer' }}>
-          {title}
+          {title || '未命名'}
         </span>
       )}
     </span>

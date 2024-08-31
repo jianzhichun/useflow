@@ -7,6 +7,7 @@
     "build": "vite build",
     "electron-dev": "electron .",
     "electron-build": "electron-builder",
+    "package": "cnpm i && vite build && electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -52,7 +53,6 @@
     "@vitejs/plugin-react": "^4.2.1",
     "electron": "^32.0.1",
     "electron-builder": "^24.13.3",
-    "electron-updater": "^6.2.1",
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
@@ -93,7 +93,7 @@
       "output": "electron"
     },
     "win": {
-      "icon": "public/favicon.ico"
+      "icon": "public/favicon.png"
     },
     "mac": {
       "icon": "public/favicon.icns",

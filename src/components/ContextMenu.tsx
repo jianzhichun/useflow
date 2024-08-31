@@ -16,12 +16,12 @@ const ContextMenu = ({ position, onAddNode, nodeTypes }: any) => {
     const menus = useMemo(() => items.reduce((arr: any[], item) => {
         if (item?.category) {
             if (!arr.some(({ key }) => key === item.category)) {
-                arr.push({ key: item.category, label: item.category, children: [item] });
+                arr.push({ key: item.category, label: item.category, children: [{ key: item.key, label: item.label }] });
             } else {
-                arr.find(({ key }) => key === item.category).children.push(item);
+                arr.find(({ key }) => key === item.category).children.push({ key: item.key, label: item.label });
             }
         } else {
-            arr.push(item);
+            arr.push({ key: item.key, label: item.label });
         }
         return arr;
     }, []), [items]);
