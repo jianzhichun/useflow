@@ -22,6 +22,6 @@ jobs:
           node-version: '18'
 
       - name: Build and Publish
-        run: yarn package
+        run: yarn package --publish always
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
