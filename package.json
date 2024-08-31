@@ -74,20 +74,14 @@
     "appId": "useflow",
     "productName": "岩石useflow",
     "files": [
-      {
-        "from": "dist/",
-        "to": "dist/",
-        "filter": [
-          "**/*"
-        ]
-      },
+      "dist/",
+      "main.js",
+      "package.json",
+      "!node_modules/**",
       {
         "from": "dist/node_modules",
         "to": "dist/node_modules"
-      },
-      "main.js",
-      "package.json",
-      "!node_modules/**"
+      }
     ],
     "directories": {
       "output": "electron"
