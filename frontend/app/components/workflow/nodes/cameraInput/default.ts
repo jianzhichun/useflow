@@ -1,16 +1,16 @@
-import type { NodeDefault } from '../../types'
+import { BlockEnum, type NodeDefault } from '../../types'
 import type { CameraNodeType } from './types'
-import { ALL_AVAILABLE_BLOCKS } from '@/app/components/workflow/constants'
+import { ALL_AVALIBALE_BLOCKs_AFTER_CAMERA, NODES_EXTRA_DATA, NODES_INITIAL_DATA } from '@/app/components/workflow/constants'
 
 const nodeDefault: NodeDefault<CameraNodeType> = {
   defaultValue: {
     // variables: [],
   },
   getAvailablePrevNodes() {
-    return []
+    return Object.keys(NODES_EXTRA_DATA).filter(key => key !== BlockEnum.End) as BlockEnum[]
   },
   getAvailableNextNodes() {
-    return ALL_AVAILABLE_BLOCKS
+    return ALL_AVALIBALE_BLOCKs_AFTER_CAMERA
   },
   checkValid() {
     return {

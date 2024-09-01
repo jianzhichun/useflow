@@ -57,5 +57,5 @@ export const useAvailableBlocks = (nodeType?: BlockEnum, isInIteration?: boolean
         return true
       }),
     }
-  }, [isInIteration, availablePrevBlocks, availableNextBlocks])
+  }, [availablePrevBlocks, availableNextBlocks])
 }

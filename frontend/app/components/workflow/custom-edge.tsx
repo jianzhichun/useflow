@@ -1,7 +1,9 @@
 import {
   memo,
+  useCallback,
   useState,
 } from 'react'
+import { intersection } from 'lodash-es'
 import type { EdgeProps } from 'reactflow'
 import {
   BaseEdge,
@@ -9,8 +11,17 @@ import {
   Position,
   getBezierPath,
 } from 'reactflow'
-import cn from '@/utils/classnames'
+import {
+  useAvailableBlocks,
+  useNodesInteractions,
+} from './hooks'
+import BlockSelector from './block-selector'
+import type {
+  Edge,
+  OnSelectBlock,
+} from './types'
 import { ITERATION_CHILDREN_Z_INDEX } from './constants'
+import cn from '@/utils/classnames'
 
 const CustomEdge = ({
   id,
@@ -34,11 +45,33 @@ const CustomEdge = ({
     sourceY,
     sourcePosition: Position.Right,
     targetX: targetX + 8,
-  targetY,
+    targetY,
     targetPosition: Position.Left,
     curvature: 0.16,
   })
   const [open, setOpen] = useState(false)
+  const { handleNodeAdd } = useNodesInteractions()
+  const { availablePrevBlocks } = useAvailableBlocks((data as Edge['data'])!.targetType, (data as Edge['data'])?.isInIteration)
+  const { availableNextBlocks } = useAvailableBlocks((data as Edge['data'])!.sourceType, (data as Edge['data'])?.isInIteration)
+
+  const handleOpenChange = useCallback((v: boolean) => {
+    setOpen(v)
+  }, [])
+
+  const handleInsert = useCallback<OnSelectBlock>((nodeType, toolDefaultValue) => {
+    handleNodeAdd(
+      {
+        nodeType,
+        toolDefaultValue,
+      },
+      {
+        prevNodeId: source,
+        prevNodeSourceHandle: sourceHandleId || 'source',
+        nextNodeId: target,
+        nextNodeTargetHandle: targetHandleId || 'target',
+      },
+    )
+  }, [handleNodeAdd, source, sourceHandleId, target, targetHandleId])
 
   return (
     <>
@@ -64,6 +97,14 @@ const CustomEdge = ({
             pointerEvents: 'all',
           }}
         >
+          <BlockSelector
+            open={open}
+            onOpenChange={handleOpenChange}
+            asChild
+            onSelect={handleInsert}
+            availableBlocksTypes={intersection(availablePrevBlocks, availableNextBlocks)}
+            triggerClassName={() => 'hover:scale-150 transition-all'}
+          />
         </div>
       </EdgeLabelRenderer>
     </>

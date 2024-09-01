@@ -43,16 +43,6 @@ export const initialNodes = (originNodes: Node[], originEdges: Edge[]) => {
     })
   }
 
-  // const iterationNodeMap = nodes.reduce((acc, node) => {
-  //   if (node.parentId) {
-  //     if (acc[node.parentId])
-  //       acc[node.parentId].push(node.id)
-  //     else
-  //       acc[node.parentId] = [node.id]
-  //   }
-  //   return acc
-  // }, {} as Record<string, string[]>)
-
   return nodes.map((node) => {
     if (!node.type)
       node.type = CUSTOM_NODE
@@ -282,4 +272,15 @@ export const isEventTargetInputArea = (target: HTMLElement) => {
 
   if (target.contentEditable === 'true')
     return true
+}
+
+const specialKeysCodeMap: Record<string, string | undefined> = {
+  ctrl: 'meta',
+}
+
+export const getKeyboardKeyCodeBySystem = (key: string) => {
+  if (isMac())
+    return specialKeysCodeMap[key] || key
+
+  return key
 }

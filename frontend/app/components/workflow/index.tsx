@@ -12,19 +12,20 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import "./style.css";
 import type { Edge, Node } from "./types";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useMemo, useRef } from "react";
 import {
   useWorkflowInit,
   useNodesInteractions,
   usePanelInteractions,
 } from "./hooks";
-import { initialEdges, initialNodes, isEventTargetInputArea } from "./utils";
+import { getKeyboardKeyCodeBySystem, initialEdges, initialNodes, isEventTargetInputArea } from "./utils";
 import Loading from "@/app/components/base/loading";
-import { WorkflowHistoryProvider } from "./workflow-history-store";
+import { useWorkflowHistoryStore, WorkflowHistoryProvider } from "./workflow-history-store";
 import { WorkflowContextProvider } from "./context";
 import { CUSTOM_NODE, WORKFLOW_DATA_UPDATE } from "./constants";
 import CustomNode from "./nodes";
 import CustomEdge from "./custom-edge";
+import CustomConnectionLine from './custom-connection-line';
 import PanelContextmenu from "./panel-contextmenu";
 import CandidateNode from "./candidate-node";
 import { useEventEmitterContextContext } from "@/context/event-emitter";
@@ -32,6 +33,7 @@ import Panel from "./panel";
 import { useWorkflowUpdate } from "./hooks/use-workflow-interactions";
 import { useEventListener, useKeyPress } from "ahooks";
 import { useWorkflowStore } from "./store";
+import { useEdgesInteractions } from "./hooks/use-edges-interactions";
 
 type WorkflowProps = {
   nodes: Node[];
@@ -77,6 +79,7 @@ const Workflow: FC<WorkflowProps> = memo(
       if ((e.key === "s" || e.key === "S") && (e.ctrlKey || e.metaKey))
         e.preventDefault();
     });
+    
     useEventListener("mousemove", (e) => {
       const containerClientRect =
         workflowContainerRef.current?.getBoundingClientRect();
@@ -112,6 +115,13 @@ const Workflow: FC<WorkflowProps> = memo(
     } = useNodesInteractions();
 
     const {
+      handleEdgeEnter,
+      handleEdgeLeave,
+      handleEdgeDelete,
+      handleEdgesChange,
+    } = useEdgesInteractions()
+
+    const {
       handlePaneContextMenu,
       // handlePaneContextmenuCancel,
     } = usePanelInteractions();
@@ -120,6 +130,34 @@ const Workflow: FC<WorkflowProps> = memo(
       if (isEventTargetInputArea(e.target as HTMLElement)) return;
       handleNodesDelete();
     });
+
+    useKeyPress(['delete', 'backspace'], handleEdgeDelete)
+    useKeyPress(`${getKeyboardKeyCodeBySystem('ctrl')}.c`, (e) => {
+      if (isEventTargetInputArea(e.target as HTMLElement))
+        return
+  
+      handleNodesCopy()
+    }, { exactMatch: true, useCapture: true })
+    useKeyPress(`${getKeyboardKeyCodeBySystem('ctrl')}.v`, (e) => {
+      if (isEventTargetInputArea(e.target as HTMLElement))
+        return
+  
+      handleNodesPaste()
+    }, { exactMatch: true, useCapture: true })
+
+    const { shortcutsEnabled: workflowHistoryShortcutsEnabled } = useWorkflowHistoryStore()
+
+    useKeyPress(
+      `${getKeyboardKeyCodeBySystem('ctrl')}.z`,
+      () => workflowHistoryShortcutsEnabled && handleHistoryBack(),
+      { exactMatch: true, useCapture: true },
+    )
+  
+    useKeyPress(
+      [`${getKeyboardKeyCodeBySystem('ctrl')}.y`, `${getKeyboardKeyCodeBySystem('ctrl')}.shift.z`],
+      () => workflowHistoryShortcutsEnabled && handleHistoryForward(),
+      { exactMatch: true, useCapture: true },
+    )
 
     return (
       <div
@@ -147,14 +185,14 @@ const Workflow: FC<WorkflowProps> = memo(
           onConnect={handleNodeConnect}
           onConnectStart={handleNodeConnectStart}
           onConnectEnd={handleNodeConnectEnd}
-          // onEdgeMouseEnter={handleEdgeEnter}
-          // onEdgeMouseLeave={handleEdgeLeave}
-          // onEdgesChange={handleEdgesChange}
+          onEdgeMouseEnter={handleEdgeEnter}
+          onEdgeMouseLeave={handleEdgeLeave}
+          onEdgesChange={handleEdgesChange}
           // onSelectionStart={handleSelectionStart}
           // onSelectionChange={handleSelectionChange}
           // onSelectionDrag={handleSelectionDrag}
           onPaneContextMenu={handlePaneContextMenu}
-          // connectionLineComponent={CustomConnectionLine}
+          connectionLineComponent={CustomConnectionLine}
           // connectionLineContainerStyle={{ zIndex: ITERATION_CHILDREN_Z_INDEX }}
           defaultViewport={viewport}
           multiSelectionKeyCode={null}

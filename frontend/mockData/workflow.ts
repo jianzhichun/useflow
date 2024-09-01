@@ -28,34 +28,7 @@ export const workflowInitData: any = {
       zoom: 1,
     },
   },
-  features: {
-    opening_statement: "",
-    suggested_questions: [],
-    suggested_questions_after_answer: {
-      enabled: false,
-    },
-    text_to_speech: {
-      enabled: false,
-      voice: "",
-      language: "",
-    },
-    speech_to_text: {
-      enabled: false,
-    },
-    retriever_resource: {
-      enabled: true,
-    },
-    sensitive_word_avoidance: {
-      enabled: false,
-    },
-    file_upload: {
-      image: {
-        enabled: false,
-        number_limits: 3,
-        transfer_methods: ["local_file", "remote_url"],
-      },
-    },
-  },
+  features: {},
   hash: "5bf286b544c9f40a6cd87a2f55946426932b7df8b2676c81c859dd71ad35de19",
   created_by: {
     id: "b3cd70d4-5dda-4b8d-9db0-4122e40fdcff",
