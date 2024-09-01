@@ -77,7 +77,7 @@
       }
     ],
     "appId": "useflow",
-    "productName": "岩石useflow",
+    "productName": "useflow",
     "files": [
       "dist/",
       "main.js",
