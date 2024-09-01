@@ -22,8 +22,9 @@ export default {
     start: '开始',
     end: '结束',
     cameraInput: '摄像头输入',
+    customPose: '自定义姿势',
     poseDetection: '姿势识别',
-    actionArragement: '行为编排',
+    actionArrangement: '行为编排',
     videoRender: '视频渲染',
   },
 };
