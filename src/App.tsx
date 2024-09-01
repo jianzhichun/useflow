@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { Edge, Node } from '@xyflow/react';
-import { Button, Input, Space, Menu, Popover, Flex, Popconfirm, Progress } from 'antd';
+import { Button, Input, Space, Menu, Popover, Flex, Popconfirm, Progress, ConfigProvider, theme } from 'antd';
 import '@xyflow/react/dist/style.css';
 import { nanoid } from 'nanoid';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
@@ -9,7 +9,7 @@ import WithPermission, { } from './components/WithPermission';
 import { isEqual, range } from 'lodash';
 import EditableTitle from './components/EditableTitle';
 import { UseFlow, useFlowHistory } from './flows/UseFlow';
-import { geekblue } from '@ant-design/colors';
+import { orange as lightColors, geekblue as darkColors } from '@ant-design/colors';
 
 type FlowState = {
   id: string;
@@ -127,41 +127,45 @@ const TitleWithManagement: React.FC<TitleWithManagementProps> = ({
 };
 export default function App() {
   const { flows, currFlowId, changeCurrFlow, createFlow, deleteFlow, currFlowHistory, currFlowHistory: { title, setTitle } } = useMultipleFlows();
+  const [isDark, setIsDark] = useLocalStorageState<boolean>("isDark", { defaultValue: true });
   const [progress, setProgress] = useState();
   useEffect(() => {
-    let ipcRenderer: any;
-    const loadElectron = async () => {
-      try {
-        const electron = await import('electron');
-        ipcRenderer = electron.ipcRenderer;
-        ipcRenderer.on('update-progress', (event: any, { percent }: any) => setProgress(percent));
-      } catch (error) {
-        console.error('Failed to load electron module:', error);
-      }
-    };
-    loadElectron();
-    return () => {
-      if (ipcRenderer) {
+    ConfigProvider.config({
+      holderRender: (children) => (
+        <ConfigProvider
+          theme={{ algorithm: [isDark ? theme.darkAlgorithm : theme.defaultAlgorithm, theme.compactAlgorithm] }}
+        >{children}</ConfigProvider>
+      ),
+    });
+  }, [isDark]);
+  useEffect(() => {
+    if ((window as any).electron) {
+      const { ipcRenderer } = (window as any).electron;
+      ipcRenderer.on('update-progress', (_: any, { percent }: any) => setProgress(percent));
+      return () => {
         ipcRenderer.removeAllListeners('update-progress');
-      }
-    };
+      };
+    }
   }, []);
   const steps = useMemo(() => Math.ceil(window.innerWidth / 4), [window.innerWidth]);
+  const colors = useMemo(() => isDark ? darkColors : lightColors, [isDark]);
   return <WithPermission>
-    {!!progress && progress != 100 && <Progress
-      size={'small'} style={{ display: 'flex' }} showInfo={false}
-      percent={progress}
-      steps={steps}
-      strokeColor={range(0, steps).map(i => geekblue[Math.floor(i / Math.ceil(steps / 10))])}
-    ></Progress>}
-    <UseFlow titleRender={<TitleWithManagement
-      title={title}
-      flows={flows || []}
-      currFlowId={currFlowId ?? ""}
-      onChangeTitle={setTitle}
-      onSelectFlow={changeCurrFlow}
-      onDeleteFlow={deleteFlow}
-      onCreateFlow={createFlow}
-    />} {...currFlowHistory} />
+    <ConfigProvider componentSize='small' theme={{ algorithm: [isDark ? theme.darkAlgorithm : theme.defaultAlgorithm, theme.compactAlgorithm] }}>
+      {!!progress && progress != 100 && <Progress
+        size={'small'} style={{ display: 'flex' }} showInfo={false}
+        percent={progress}
+        steps={steps}
+        strokeColor={range(0, steps).map(i => colors[Math.floor(i / Math.ceil(steps / colors.length))])}
+      ></Progress>}
+      <UseFlow titleRender={<TitleWithManagement
+        title={title}
+        flows={flows || []}
+        currFlowId={currFlowId ?? ""}
+        onChangeTitle={setTitle}
+        onSelectFlow={changeCurrFlow}
+        onDeleteFlow={deleteFlow}
+        onCreateFlow={createFlow}
+      />} {...currFlowHistory} isDark={isDark || false} setIsDark={setIsDark} />
+    </ConfigProvider>
   </WithPermission>;
 }

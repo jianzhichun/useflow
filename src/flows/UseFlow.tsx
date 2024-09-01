@@ -123,7 +123,7 @@ export function useFlowHistory(initialTitle: string, initialNodes: Node[], initi
     }, [debouncedCurrState, historyCapacity]);
     return { title, nodes, edges, setTitle, setNodes, setEdges, onNodesChange, onEdgesChange, undo, redo, reset, save, clear, canUndo, canRedo, canSave, canClear };
 }
-export function UseFlow({ titleRender, title, nodes, edges, setNodes, setEdges, onNodesChange, onEdgesChange, undo, redo, save, clear, canUndo, canRedo, canClear }: UseFlowHistory & { titleRender: ReactNode }) {
+export function UseFlow({ titleRender, isDark, setIsDark, title, nodes, edges, setNodes, setEdges, onNodesChange, onEdgesChange, undo, redo, save, clear, canUndo, canRedo, canClear }: UseFlowHistory & { titleRender: ReactNode } & { isDark: boolean, setIsDark: (dark: boolean) => void }) {
     const [menuPosition, setMenuPosition] = useState<{ x: number, y: number } | null>();
     const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null);
     const { screenToFlowPosition } = useReactFlow();
@@ -219,19 +219,9 @@ export function UseFlow({ titleRender, title, nodes, edges, setNodes, setEdges, 
             cancelText: '否'
         });
     }, []);
-    const [isDark, setIsDark] = useLocalStorageState<boolean>("isDark");
-    useEffect(() => {
-        ConfigProvider.config({
-            holderRender: (children) => (
-                <ConfigProvider
-                    theme={{ algorithm: [isDark ? theme.darkAlgorithm : theme.defaultAlgorithm, theme.compactAlgorithm] }}
-                >{children}</ConfigProvider>
-            ),
-        });
-    }, [isDark]);
     const permission = usePermission("baseddl");
     const resetLicense = useResetLicense();
-    return <ConfigProvider componentSize='small' theme={{ algorithm: [isDark ? theme.darkAlgorithm : theme.defaultAlgorithm, theme.compactAlgorithm] }}>
+    return <>
         <ReactFlow
             ref={reactFlowWrapper}
             onContextMenu={onContextMenu}
@@ -282,6 +272,6 @@ export function UseFlow({ titleRender, title, nodes, edges, setNodes, setEdges, 
                 {permission?.value && moment(permission.value).format('yyyy-MM-DD HH:mm')}到期
             </Panel>
         </ReactFlow>
-        <ContextMenu position={menuPosition} onAddNode={onAddNode} nodeTypes={nodeTypes} />;
-    </ConfigProvider>;
+        <ContextMenu position={menuPosition} onAddNode={onAddNode} nodeTypes={nodeTypes} />
+    </>;
 }

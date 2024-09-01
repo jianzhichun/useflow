@@ -1,6 +1,6 @@
 {
   "name": "useflow",
-  "version": "0.0.3",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -61,6 +61,7 @@
     "typescript": "^5.5.4",
     "vite": "^5.0.12",
     "vite-plugin-clean": "^1.0.0",
+    "vite-plugin-electron": "^0.28.7",
     "vite-plugin-html": "^3.2.2",
     "vite-plugin-mediapipe": "^0.1.0",
     "vite-plugin-static-copy": "^1.0.6",
@@ -81,6 +82,7 @@
     "files": [
       "dist/",
       "main.js",
+      "preload.js",
       "package.json",
       {
         "from": "dist/node_modules",
@@ -88,7 +90,7 @@
       }
     ],
     "directories": {
-      "output": "electron"
+      "output": "electron-dist"
     },
     "win": {
       "icon": "public/favicon.png"

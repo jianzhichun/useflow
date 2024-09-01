@@ -18,7 +18,10 @@ function createWindow() {
         width: 800,
         height: 600,
         webPreferences: {
-            nodeIntegration: true,
+            preload: path.join(__dirname, 'preload.js'),
+            contextIsolation: true,
+            enableRemoteModule: false,
+            nodeIntegration: false
         }
     });
     mainWindow.loadFile(path.join(__dirname, 'dist/index.html'));
@@ -72,22 +75,26 @@ function createWindow() {
         dialog.showMessageBox({
             type: 'info',
             title: '更新可用',
-            message: '有新版本可用，正在下载...'
+            message: '有新版本可用，您现在要更新吗？',
+            buttons: ['立即更新', '稍后'],
+            defaultId: 0,
+            cancelId: 1,
+        }).then((result) => {
+            if (result.response === 0) {
+                autoUpdater.downloadUpdate();
+            } else {
+                console.log('用户选择了稍后更新');
+            }
+        }).catch((error) => {
+            console.error('显示对话框失败:', error);
         });
-        autoUpdater.downloadUpdate();
     });
     autoUpdater.on('download-progress', (progressObj) => {
         const percent = Math.round(progressObj.percent);
         mainWindow.webContents.send('update-progress', { percent });
     });
     autoUpdater.on('update-downloaded', (info) => {
-        dialog.showMessageBox({
-            type: 'info',
-            title: '更新下载完成',
-            message: '更新已下载完成，应用程序将重启以应用更新。'
-        }).then(() => {
-            autoUpdater.quitAndInstall();
-        });
+        autoUpdater.quitAndInstall();
     });
     autoUpdater.on('update-not-available', (info) => {
         dialog.showMessageBox({
