@@ -28,7 +28,7 @@ import { useDebounce, useDeepCompareEffect, useKeyPress, useLocalStorageState } 
 import { usePermission, useResetLicense } from '../components/WithPermission';
 import { decrypt, encrypt } from '../components/Utils';
 import moment from 'moment';
-import { useRuntimeNodeStore } from '../App';
+import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
 
 type FlowState = {
     title: string;

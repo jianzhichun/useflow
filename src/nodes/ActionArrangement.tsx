@@ -1,5 +1,5 @@
 import { NodeProps, useUpdateNodeInternals } from "@xyflow/react";
-import { useRuntimeNodeStore } from "../App";
+import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
 import UseHandle from "../components/UseHandle";
 import { useForm } from "antd/es/form/Form";
 import { Button, Flex, Form, Input, InputNumber, Select, Space } from "antd";

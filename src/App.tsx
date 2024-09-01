@@ -1,66 +1,15 @@
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useMemo } from 'react';
 import { Edge, Node } from '@xyflow/react';
-import { Button, Input, Space, Menu, Popover, Flex, Popconfirm } from 'antd';
+import { Button, Input, Space, Menu, Popover, Flex, Popconfirm, Progress } from 'antd';
 import '@xyflow/react/dist/style.css';
 import { nanoid } from 'nanoid';
-import { create } from 'zustand';
-import { subscribeWithSelector } from 'zustand/middleware';
-import { Tensor } from '@tensorflow/tfjs-core';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { useDeepCompareEffect, useLocalStorageState } from 'ahooks';
 import WithPermission, { } from './components/WithPermission';
-import { isEqual } from 'lodash';
+import { isEqual, range } from 'lodash';
 import EditableTitle from './components/EditableTitle';
 import { UseFlow, useFlowHistory } from './flows/UseFlow';
-
-interface RuntimeNodeState {
-  edges: Edge[],
-  [id: string]: { [K: string]: Tensor | any },
-  get: (id: string, key?: string) => any,
-  set: (id: string, nodeData: { [K: string]: Tensor | any }) => void
-}
-export const useRuntimeNodeStore = create<RuntimeNodeState>()(subscribeWithSelector((setState, getState) => {
-  return {
-    edges: [],
-    get(id: string, key?: string) {
-      const state = getState();
-      const edges = state.edges;
-      const getOne = (id: string, key: string) => {
-        let id_ = id, key_ = key;
-        for (
-          let edge = edges.find(({ target, targetHandle }) => target === id_ && targetHandle === key_);
-          edge?.sourceHandle;
-          id_ = edge.source, key_ = edge.sourceHandle,
-          edge = edges.find(({ target, targetHandle }) => target === id_ && targetHandle === key_)
-        ) { }
-        return state?.[id_]?.[key_];
-      }
-
-      if (!key) {
-        return edges.filter(({ target }) => target === id).reduce((params, edge) => {
-          if (edge.targetHandle) {
-            return { ...params, [edge.targetHandle]: getOne(id, edge.targetHandle) };
-          } else {
-            return params;
-          }
-        }, {});
-      }
-      return getOne(id, key);
-    },
-    set(id: string, nodeData: { [K: string]: Tensor | any }) {
-      setState(state => {
-        const currentData = state[id] || {};
-        Object.keys(nodeData).forEach(key => {
-          const prevValue = currentData[key];
-          if (prevValue instanceof Tensor) {
-            prevValue.dispose();
-          }
-        });
-        return { [id]: { ...currentData, ...nodeData } };
-      });
-    }
-  };
-}));
+import { geekblue } from '@ant-design/colors';
 
 type FlowState = {
   id: string;
@@ -178,7 +127,33 @@ const TitleWithManagement: React.FC<TitleWithManagementProps> = ({
 };
 export default function App() {
   const { flows, currFlowId, changeCurrFlow, createFlow, deleteFlow, currFlowHistory, currFlowHistory: { title, setTitle } } = useMultipleFlows();
+  const [progress, setProgress] = useState();
+  useEffect(() => {
+    let ipcRenderer: any;
+    const loadElectron = async () => {
+      try {
+        const electron = await import('electron');
+        ipcRenderer = electron.ipcRenderer;
+        ipcRenderer.on('update-progress', (event: any, { percent }: any) => setProgress(percent));
+      } catch (error) {
+        console.error('Failed to load electron module:', error);
+      }
+    };
+    loadElectron();
+    return () => {
+      if (ipcRenderer) {
+        ipcRenderer.removeAllListeners('update-progress');
+      }
+    };
+  }, []);
+  const steps = useMemo(() => Math.ceil(window.innerWidth / 4), [window.innerWidth]);
   return <WithPermission>
+    {!!progress && progress != 100 && <Progress
+      size={'small'} style={{ display: 'flex' }} showInfo={false}
+      percent={progress}
+      steps={steps}
+      strokeColor={range(0, steps).map(i => geekblue[Math.floor(i / Math.ceil(steps / 10))])}
+    ></Progress>}
     <UseFlow titleRender={<TitleWithManagement
       title={title}
       flows={flows || []}

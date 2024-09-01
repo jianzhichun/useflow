@@ -1,7 +1,7 @@
 import { NodeProps } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
 import UseHandle from '../components/UseHandle';
-import { useRuntimeNodeStore } from '../App';
+import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
 import Markdown from '../components/Markdown';
 import ResizableNode from '../components/ResizableNode';
 export function Log({ id, selected, data }: NodeProps<Node<any, "log">>) {

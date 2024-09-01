@@ -2,7 +2,7 @@ import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
 import { useEffect } from 'react';
 import UseHandle from '../components/UseHandle';
-import { useRuntimeNodeStore } from '../App';
+import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
 import Instructions from '../components/Instructions';
 import { usePoseDetector } from '../components/PoseDetector';
 import { isEqual } from 'lodash';

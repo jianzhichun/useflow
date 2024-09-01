@@ -43,5 +43,8 @@ export default defineConfig({
   ],
   build: {
     chunkSizeWarningLimit: 10 * 1024,
+    rollupOptions: {
+      external: ['electron', 'electron-updater', 'electron-log']
+    }
   }
 })

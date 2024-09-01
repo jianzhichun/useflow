@@ -13,7 +13,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "electron-updater": "^6.3.0-alpha.6"
+    "electron-log": "^5.1.7",
+    "electron-updater": "^6.3.4"
   },
   "license": "AGPL-3.0-only",
   "devDependencies": {
@@ -72,7 +73,7 @@
         "provider": "github",
         "owner": "jianzhichun",
         "repo": "useflow-release",
-        "releaseType": "release" 
+        "releaseType": "release"
       }
     ],
     "appId": "useflow",
@@ -96,7 +97,7 @@
       "icon": "public/favicon.icns",
       "target": [
         {
-          "target": "dmg",
+          "target": "default",
           "arch": [
             "universal"
           ]

@@ -2,12 +2,17 @@ import { app, BrowserWindow, Menu, dialog } from 'electron';
 import * as path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import log from 'electron-log';
 import electronUpdater from 'electron-updater';
 
 const { autoUpdater } = electronUpdater;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 let mainWindow;
+
+autoUpdater.logger = log;
+autoUpdater.logger.transports.file.level = 'info';
+autoUpdater.logger.transports.console.level = 'info';
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
@@ -17,7 +22,7 @@ function createWindow() {
         }
     });
     mainWindow.loadFile(path.join(__dirname, 'dist/index.html'));
-    Menu.setApplicationMenu(Menu.buildFromTemplate([
+    const menu = Menu.buildFromTemplate([
         {
             label: '文件',
             submenu: [
@@ -55,19 +60,25 @@ function createWindow() {
                 {
                     label: '检查更新',
                     click: () => {
+                        autoUpdater.setFeedURL('https://mirror.ghproxy.com/https://github.com/jianzhichun/useflow-release/releases/latest/download/');
                         autoUpdater.checkForUpdates();
                     }
                 }
             ]
         }
-    ]));
+    ]);
+    Menu.setApplicationMenu(menu);
     autoUpdater.on('update-available', (info) => {
-        autoUpdater.downloadUpdate();
         dialog.showMessageBox({
             type: 'info',
             title: '更新可用',
             message: '有新版本可用，正在下载...'
         });
+        autoUpdater.downloadUpdate();
+    });
+    autoUpdater.on('download-progress', (progressObj) => {
+        const percent = Math.round(progressObj.percent);
+        mainWindow.webContents.send('update-progress', { percent });
     });
     autoUpdater.on('update-downloaded', (info) => {
         dialog.showMessageBox({

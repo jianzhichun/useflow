@@ -3,7 +3,7 @@ import type { Node } from '@xyflow/react';
 import { useEffect, useState } from 'react';
 import { Select, Form, Switch } from 'antd';
 import UseHandle from '../components/UseHandle';
-import { useRuntimeNodeStore } from '../App';
+import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
 import { useTfjs } from '../components/Tfjs';
 import ResizableNode from '../components/ResizableNode';
 import { useForm } from 'antd/es/form/Form';

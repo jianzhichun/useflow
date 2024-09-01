@@ -1,7 +1,7 @@
 import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
 import UseHandle from '../components/UseHandle';
-import { useRuntimeNodeStore } from '../App';
+import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
 import { toPixels, useTfjs } from '../components/Tfjs';

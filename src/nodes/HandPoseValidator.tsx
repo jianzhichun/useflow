@@ -1,6 +1,6 @@
 import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
-import { useRuntimeNodeStore } from '../App';
+import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
 import { useEffect, useRef, useState } from 'react';
 import { Upload, Image as AntdImage, Form, Slider, Select, Popover, Space, Button, Flex, InputNumber, message } from 'antd';
 import { LineChartOutlined, MinusCircleOutlined, PlusOutlined, UnorderedListOutlined, UploadOutlined } from '@ant-design/icons';

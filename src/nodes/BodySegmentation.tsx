@@ -1,7 +1,7 @@
 import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
 import { useEffect } from 'react';
 import UseHandle from '../components/UseHandle';
-import { useRuntimeNodeStore } from '../App';
+import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
 import Instructions from '../components/Instructions';
 import { isEqual } from 'lodash';
 import ResizableNode from '../components/ResizableNode';
