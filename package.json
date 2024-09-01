@@ -1,6 +1,6 @@
 {
   "name": "useflow",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "type": "module",
   "copyright": "金华岩石信息科技有限公司",
   "scripts": {
@@ -93,20 +93,27 @@
     "directories": {
       "output": "electron-dist"
     },
-    "win": {
-      "icon": "public/favicon.png"
-    },
-    "mac": {
-      "icon": "public/favicon.icns",
-      "target": [
-        {
-          "target": "default",
-          "arch": [
-            "universal"
-          ]
-        }
-      ]
-    },
+      "win": {
+        "icon": "public/favicon.png",
+        "target": [
+          {
+            "target": "nsis",
+            "artifactName": "${productName}.${ext}"
+          }
+        ]
+      },
+      "mac": {
+        "icon": "public/favicon.icns",
+        "target": [
+          {
+            "target": "default",
+            "arch": [
+              "universal"
+            ],
+            "artifactName": "${productName}.${ext}"
+          }
+        ]
+      },
     "dmg": {
       "contents": [
         {
