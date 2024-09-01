@@ -99,7 +99,7 @@
       "icon": "public/favicon.icns",
       "target": [
         {
-          "target": "default",
+          "target": "dmg",
           "arch": [
             "universal"
           ]

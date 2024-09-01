@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, dialog } from 'electron';
+import { app, BrowserWindow, Menu, dialog, shell } from 'electron';
 import * as path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -94,7 +94,23 @@ function createWindow() {
         mainWindow.webContents.send('update-progress', { percent });
     });
     autoUpdater.on('update-downloaded', (info) => {
-        autoUpdater.quitAndInstall();
+        dialog.showMessageBox({
+            type: 'info',
+            title: '更新安装包下载完成',
+            message: '打开下载目录？',
+            buttons: ['打开', '稍后'],
+            defaultId: 0,
+            cancelId: 1,
+        }).then((result) => {
+            if (result.response === 0) {
+                const downloadDir = path.dirname(info.downloadedFile);
+                shell.showItemInFolder(downloadDir);
+            } else {
+                console.log('用户选择了稍后更新');
+            }
+        }).catch((error) => {
+            console.error('显示对话框失败:', error);
+        });
     });
     autoUpdater.on('update-not-available', (info) => {
         dialog.showMessageBox({
@@ -105,7 +121,7 @@ function createWindow() {
     });
     autoUpdater.on('error', (err) => {
         log.error('更新错误:', err);
-        dialog.showErrorBox('更新错误', err == null ? "unknown" : (err.stack || err).toString());
+        // dialog.showErrorBox('更新错误', err == null ? "unknown" : (err.stack || err).toString());
     });
 }
 
