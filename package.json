@@ -9,7 +9,6 @@
     "electron-dev": "electron .",
     "electron-build": "electron-builder",
     "package": "yarn && vite build && electron-builder",
-    "releaseit": "release-it",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -93,27 +92,22 @@
     "directories": {
       "output": "electron-dist"
     },
-      "win": {
-        "icon": "public/favicon.png",
-        "target": [
-          {
-            "target": "nsis",
-            "artifactName": "${productName}.${ext}"
-          }
-        ]
-      },
-      "mac": {
-        "icon": "public/favicon.icns",
-        "target": [
-          {
-            "target": "default",
-            "arch": [
-              "universal"
-            ],
-            "artifactName": "${productName}.${ext}"
-          }
-        ]
-      },
+    "win": {
+      "icon": "public/favicon.png",
+      "artifactName": "${productName}.${ext}"
+    },
+    "mac": {
+      "icon": "public/favicon.icns",
+      "target": [
+        {
+          "target": "default",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "artifactName": "${productName}.${ext}"
+    },
     "dmg": {
       "contents": [
         {

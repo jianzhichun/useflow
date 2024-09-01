@@ -17,7 +17,7 @@ import {
     OnNodesChange,
     OnEdgesChange
 } from '@xyflow/react';
-import { Button, Switch, ConfigProvider, theme, Modal, Space, Popover, Flex, Popconfirm, message } from 'antd';
+import { Button, Switch, Modal, Space, Popover, Flex, Popconfirm, message } from 'antd';
 import '@xyflow/react/dist/style.css';
 import { nanoid } from 'nanoid';
 import { nodeTypes } from '../nodes';
@@ -107,7 +107,7 @@ export function useFlowHistory(initialTitle: string, initialNodes: Node[], initi
         setNodes([]);
         setEdges([]);
     }, []);
-    useDeepCompareEffect(() => {
+    useEffect(() => {
         if (ignoreNextEffectRef.current) {
             ignoreNextEffectRef.current = false;
         } else {
