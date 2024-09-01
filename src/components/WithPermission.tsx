@@ -91,7 +91,7 @@ export function usePermission(key: string, msg: string = "尚未授权，请输�
             </Form>,
             footer: null,
         });
-    }, [license, key]);
+    }, [license, firstOpentime, key]);
     return permission;
 }
 
