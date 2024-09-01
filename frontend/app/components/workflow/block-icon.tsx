@@ -2,19 +2,9 @@ import type { FC } from 'react'
 import { memo } from 'react'
 import { BlockEnum } from './types'
 import {
-  Answer,
-  Code,
   End,
   Home,
-  Http,
-  IfElse,
-  Iteration,
-  KnowledgeRetrieval,
   Llm,
-  ParameterExtractor,
-  QuestionClassifier,
-  TemplatingTransform,
-  VariableX,
 } from '@/app/components/base/icons/src/vender/workflow'
 import AppIcon from '@/app/components/base/app-icon'
 
@@ -48,13 +38,6 @@ const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.VideoRender]: 'bg-[#06AED4]',
   [BlockEnum.ActionArragement]: 'bg-[#16B364]',
   [BlockEnum.End]: 'bg-[#2E90FA]',
-  // [BlockEnum.Answer]: 'bg-[#F79009]',
-  // [BlockEnum.KnowledgeRetrieval]: 'bg-[#16B364]',
-  // [BlockEnum.QuestionClassifier]: 'bg-[#16B364]',
-  // [BlockEnum.TemplateTransform]: 'bg-[#2E90FA]',
-  // [BlockEnum.VariableAssigner]: 'bg-[#2E90FA]',
-  // [BlockEnum.VariableAggregator]: 'bg-[#2E90FA]',
-  // [BlockEnum.ParameterExtractor]: 'bg-[#2E90FA]',
 }
 const BlockIcon: FC<BlockIconProps> = ({
   type,
