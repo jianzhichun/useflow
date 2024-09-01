@@ -90,19 +90,23 @@ function createWindow() {
         mainWindow.webContents.send('update-progress', { percent });
     });
     autoUpdater.on('update-downloaded', (info) => {
-        dialog.showMessageBox({
-            type: 'info',
-            title: '更新安装包下载完成',
-            message: '打开下载目录？',
-            buttons: ['打开', '稍后'],
-            defaultId: 0,
-            cancelId: 1,
-        }).then((result) => {
-            if (result.response === 0) {
-                const downloadDir = path.dirname(info.downloadedFile);
-                shell.showItemInFolder(downloadDir);
-            }
-        })
+        if (process.platform === 'darwin') {
+            dialog.showMessageBox({
+                type: 'info',
+                title: '更新安装包下载完成',
+                message: '打开下载目录？',
+                buttons: ['打开', '稍后'],
+                defaultId: 0,
+                cancelId: 1,
+            }).then((result) => {
+                if (result.response === 0) {
+                    const downloadDir = path.dirname(info.downloadedFile);
+                    shell.showItemInFolder(downloadDir);
+                }
+            });
+        } else {
+            autoUpdater.quitAndInstall();
+        }
     });
     autoUpdater.on('update-not-available', (info) => {
         dialog.showMessageBox({
@@ -113,7 +117,6 @@ function createWindow() {
     });
     autoUpdater.on('error', (err) => {
         log.error('更新错误:', err);
-        // dialog.showErrorBox('更新错误', err == null ? "unknown" : (err.stack || err).toString());
     });
 }
 
