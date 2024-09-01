@@ -223,12 +223,12 @@ const WorkflowWrap = memo(() => {
   const { data, isLoading } = useWorkflowInit();
 
   const nodesData = useMemo(() => {
-    if (data) return initialNodes(data.graph.nodes, data.graph.edges);
+    if (data) return initialNodes(data.graph.nodes || [], data.graph.edges || []);
 
     return [];
   }, [data]);
   const edgesData = useMemo(() => {
-    if (data) return initialEdges(data.graph.edges, data.graph.nodes);
+    if (data) return initialEdges(data.graph.edges || [], data.graph.nodes);
 
     return [];
   }, [data]);
