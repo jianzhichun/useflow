@@ -1,13 +1,15 @@
 import type { FC } from 'react'
 import { memo } from 'react'
 import { useNodes } from 'reactflow'
-import type { CommonNodeType } from '../types'
+import { BlockEnum, type CommonNodeType } from '../types'
 import { Panel as NodePanel } from '../nodes'
 import cn from '@/utils/classnames'
 
 const Panel: FC = () => {
   const nodes = useNodes<CommonNodeType>()
   const selectedNode = nodes.find(node => node.data.selected)
+
+  if (selectedNode?.data.type === BlockEnum.Start || selectedNode?.data.type === BlockEnum.End) return ;
 
   return (
     <div

@@ -7,7 +7,11 @@ import type {
 export enum BlockEnum {
   Start = 'start',
   End = 'end',
-  CameraInput = 'video-input',
+  CameraInput = 'cameraInput',
+  PoseDetection = 'poseDetection',
+  CustomPose = 'customPose',
+  ActionArragement = 'actionArrangement',
+  VideoRender = 'videoRender',
 }
 
 export enum NodeRunningStatus {

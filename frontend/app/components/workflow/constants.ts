@@ -31,6 +31,42 @@ export const NODES_EXTRA_DATA: Record<BlockEnum, NodesExtraData> = {
     getAvailableNextNodes: CameraInputDefault.getAvailableNextNodes,
     checkValid: CameraInputDefault.checkValid,
   },
+  [BlockEnum.PoseDetection]: {
+    author: 'Official',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: CameraInputDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: CameraInputDefault.getAvailableNextNodes,
+    checkValid: CameraInputDefault.checkValid,
+  },
+  [BlockEnum.CustomPose]: {
+    author: 'Official',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: CameraInputDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: CameraInputDefault.getAvailableNextNodes,
+    checkValid: CameraInputDefault.checkValid,
+  },
+  [BlockEnum.ActionArragement]: {
+    author: 'Official',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: CameraInputDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: CameraInputDefault.getAvailableNextNodes,
+    checkValid: CameraInputDefault.checkValid,
+  },
+  [BlockEnum.VideoRender]: {
+    author: 'Official',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: CameraInputDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: CameraInputDefault.getAvailableNextNodes,
+    checkValid: CameraInputDefault.checkValid,
+  },
   [BlockEnum.End]: {
     author: 'Official',
     about: '',
@@ -70,18 +106,38 @@ export const NODES_INITIAL_DATA: Record<BlockEnum, {
 }> = {
   [BlockEnum.Start]: {
     type: BlockEnum.Start,
-    title: '',
-    desc: '',
+    title: '工作流起点',
+    desc: '表示开启一个工作流',
   },
   [BlockEnum.CameraInput]: {
     type: BlockEnum.CameraInput,
     title: '摄像头输入',
     desc: '获取摄像头的实时画面输入',
   },
+  [BlockEnum.PoseDetection]: {
+    type: BlockEnum.PoseDetection,
+    title: '人体姿态检测',
+    desc: '检测摄像头画面中的人体姿态',
+  },
+  [BlockEnum.CustomPose]: {
+    type: BlockEnum.CustomPose,
+    title: '自定义姿态',
+    desc: '自定义人体姿态',
+  },
+  [BlockEnum.ActionArragement]: {
+    type: BlockEnum.ActionArragement,
+    title: '动作编排',
+    desc: '编排人体动作',
+  },
+  [BlockEnum.VideoRender]: {
+    type: BlockEnum.VideoRender,
+    title: '视频渲染',
+    desc: '渲染视频',
+  },
   [BlockEnum.End]: {
     type: BlockEnum.End,
-    title: '',
-    desc: '',
+    title: '结束工作流',
+    desc: '表示结束工作流',
   },
 }
 
