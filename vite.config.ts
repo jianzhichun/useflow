@@ -36,7 +36,8 @@ export default defineConfig({
     createHtmlPlugin({
       inject: {
         data: {
-          title: pkg.build.productName
+          title: pkg.build.productName,
+          ownerName: pkg.build.ownerName
         }
       }
     })

@@ -1,6 +1,6 @@
 {
   "name": "useflow",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -78,7 +78,8 @@
       }
     ],
     "appId": "useflow",
-    "productName": "岩石useflow",
+    "productName": "useflow",
+    "ownerName": "金华岩石信息科技有限公司",
     "files": [
       "dist/",
       "main.js",
@@ -99,7 +100,7 @@
       "icon": "public/favicon.icns",
       "target": [
         {
-          "target": "dmg",
+          "target": "default",
           "arch": [
             "universal"
           ]

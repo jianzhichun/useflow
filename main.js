@@ -82,12 +82,8 @@ function createWindow() {
         }).then((result) => {
             if (result.response === 0) {
                 autoUpdater.downloadUpdate();
-            } else {
-                console.log('用户选择了稍后更新');
             }
-        }).catch((error) => {
-            console.error('显示对话框失败:', error);
-        });
+        })
     });
     autoUpdater.on('download-progress', (progressObj) => {
         const percent = Math.round(progressObj.percent);
@@ -105,12 +101,8 @@ function createWindow() {
             if (result.response === 0) {
                 const downloadDir = path.dirname(info.downloadedFile);
                 shell.showItemInFolder(downloadDir);
-            } else {
-                console.log('用户选择了稍后更新');
             }
-        }).catch((error) => {
-            console.error('显示对话框失败:', error);
-        });
+        })
     });
     autoUpdater.on('update-not-available', (info) => {
         dialog.showMessageBox({
