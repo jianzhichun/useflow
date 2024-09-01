@@ -37,7 +37,7 @@ export default defineConfig({
       inject: {
         data: {
           title: pkg.build.productName,
-          ownerName: pkg.build.ownerName
+          copyright: pkg.copyright
         }
       }
     })

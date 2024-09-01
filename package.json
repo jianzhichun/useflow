@@ -1,7 +1,8 @@
 {
   "name": "useflow",
-  "version": "0.0.5",
+  "version": "0.0.1",
   "type": "module",
+  "copyright": "金华岩石信息科技有限公司",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -79,7 +80,6 @@
     ],
     "appId": "useflow",
     "productName": "useflow",
-    "ownerName": "金华岩石信息科技有限公司",
     "files": [
       "dist/",
       "main.js",
