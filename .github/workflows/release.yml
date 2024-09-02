@@ -44,8 +44,7 @@ jobs:
 
       - name: Decode Keystore
         if: runner.os == 'macOS'
-        run: |
-          echo ${{ secrets.KEYSTORE_FILE }} | base64 --decode > my-release-key.keystore
+        run: echo ${{ secrets.KEYSTORE_FILE }} | base64 --decode > my-release-key.keystore
 
       - name: Build android
         if: runner.os == 'macOS'
@@ -53,8 +52,7 @@ jobs:
       
       - name: Sign APK
         if: runner.os == 'macOS'
-        run: |
-          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
+        run: jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
           -keystore my-release-key.keystore \
           -storepass ${{ secrets.KEYSTORE_PASSWORD }} \
           -keypass ${{ secrets.KEY_PASSWORD }} \
@@ -62,9 +60,7 @@ jobs:
 
       - name: Align APK (optional but recommended)
         if: runner.os == 'macOS'
-        run: |
-          ${ANDROID_HOME}/build-tools/30.0.3/zipalign -v 4 \
-          android/app/build/outputs/apk/release/app-release-unsigned.apk electron-dist/app-release.apk
+        run: ${ANDROID_HOME}/build-tools/30.0.3/zipalign -v 4 android/app/build/outputs/apk/release/app-release-unsigned.apk electron-dist/app-release.apk
 
       - name: Build electron and Publish
         run: yarn electron:build --publish always
