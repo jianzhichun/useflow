@@ -28,3 +28,6 @@ package-lock.json
 .env
 yarn.lock
 electron-dist
+android
+icons
+manifest.webmanifest

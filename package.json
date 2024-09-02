@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "electron-dev": "electron .",
-    "electron-build": "electron-builder",
-    "package": "yarn && vite build && electron-builder",
+    "android:build": "npx capacitor-assets generate && npx cap add android && npx cap sync android && ./android/gradlew assembleRelease",
+    "electron:dev": "electron .",
+    "electron:build": "electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -19,6 +19,10 @@
   "license": "AGPL-3.0-only",
   "devDependencies": {
     "@ant-design/icons": "^5.4.0",
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
     "@mediapipe/hands": "^0.4.1675469240",
     "@mediapipe/pose": "^0.5.1675469404",
     "@mediapipe/selfie_segmentation": "^0.1.1675465747",

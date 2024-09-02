@@ -1,0 +1,6 @@
+{
+    "appId": "cn.jinhuayanshi.useflow",
+    "appName": "useflow",
+    "webDir": "dist",
+    "bundledWebRuntime": false
+}
