@@ -44,7 +44,7 @@ jobs:
 
       - name: Decode Keystore
         if: runner.os == 'macOS'
-        run: echo ${{ secrets.KEYSTORE_FILE }} | base64 --decode > my-release-key.keystore
+        run: echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > my-release-key.keystore
 
       - name: Build android
         if: runner.os == 'macOS'
