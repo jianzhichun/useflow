@@ -78,16 +78,8 @@ jobs:
             --ks-key-alias ${{ secrets.KEY_ALIAS }} \
             --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} \
             --key-pass pass:${{ secrets.KEY_PASSWORD }} \
-            --out app-release-signed.apk \
+            --out useflow.apk \
             android/app/build/outputs/apk/release/app-release-unsigned.apk
-      
-      - name: Verify APK Signature
-        run: $APKSIGNER -verify -verbose app-release-signed.apk
-        
-      - name: Align APK (optional but recommended)
-        run: |
-          ZIPALIGN=$(find $ANDROID_HOME/build-tools/ -name zipalign | sort | tail -n 1) 
-          $ZIPALIGN -v 4 app-release-signed.apk useflow.apk
 
       - name: Install GitHub CLI
         run: sudo apt-get install -y gh
