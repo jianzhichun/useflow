@@ -72,19 +72,22 @@ jobs:
       
       - name: Sign APK
         run: |
-          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
-          -keystore my-release-key.keystore \
-          -storepass ${{ secrets.KEYSTORE_PASSWORD }} \
-          -keypass ${{ secrets.KEY_PASSWORD }} \
-          android/app/build/outputs/apk/release/app-release-unsigned.apk ${{ secrets.KEY_ALIAS }}
+          APKSIGNER=$(find $ANDROID_HOME/build-tools/ -name apksigner | sort | tail -n 1) 
+          $APKSIGNER sign \
+            --ks my-release-key.keystore \
+            --ks-key-alias ${{ secrets.KEY_ALIAS }} \
+            --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} \
+            --key-pass pass:${{ secrets.KEY_PASSWORD }} \
+            --out app-release-signed.apk \
+            android/app/build/outputs/apk/release/app-release-unsigned.apk
       
       - name: Verify APK Signature
-        run: jarsigner -verify -verbose -certs android/app/build/outputs/apk/release/app-release-unsigned.apk
+        run: $APKSIGNER -verify -verbose app-release-signed.apk
         
       - name: Align APK (optional but recommended)
         run: |
           ZIPALIGN=$(find $ANDROID_HOME/build-tools/ -name zipalign | sort | tail -n 1) 
-          $ZIPALIGN -v 4 android/app/build/outputs/apk/release/app-release-unsigned.apk app-release.apk
+          $ZIPALIGN -v 4 app-release-signed.apk useflow.apk
 
       - name: Install GitHub CLI
         run: sudo apt-get install -y gh
@@ -100,8 +103,8 @@ jobs:
         run: |
           if gh release view ${{ env.TAG_NAME }} -R jianzhichun/useflow-release >/dev/null 2>&1; then
             echo "Release ${{ env.TAG_NAME }} already exists. Uploading APK..."
-            gh release upload ${{ env.TAG_NAME }} app-release.apk -R jianzhichun/useflow-release
+            gh release upload ${{ env.TAG_NAME }} useflow.apk -R jianzhichun/useflow-release
           else
             echo "Creating new release ${{ env.TAG_NAME }} and uploading APK..."
-            gh release create ${{ env.TAG_NAME }} app-release.apk -R jianzhichun/useflow-release --title "Release ${{ env.TAG_NAME }}" --notes "APK release"
+            gh release create ${{ env.TAG_NAME }} useflow.apk -R jianzhichun/useflow-release --title "Release ${{ env.TAG_NAME }}" --notes "APK release"
           fi
