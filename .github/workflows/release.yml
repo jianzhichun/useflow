@@ -1,4 +1,4 @@
-name: Release Mobile
+name: Release PC
 
 on:
   push:
@@ -6,6 +6,32 @@ on:
       - 'v*.*.*'
 
 jobs:
+  build-pc:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: yarn
+      
+      - name: Build the web assets
+        run: yarn build
+
+      - name: Build electron and Publish
+        run: yarn electron:build --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
   build-android:
     runs-on: ubuntu-latest
 
