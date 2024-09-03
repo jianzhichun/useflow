@@ -127,7 +127,7 @@ const TitleWithManagement: React.FC<TitleWithManagementProps> = ({
 };
 export default function App() {
   const { flows, currFlowId, changeCurrFlow, createFlow, deleteFlow, currFlowHistory, currFlowHistory: { title, setTitle } } = useMultipleFlows();
-  const [isDark, setIsDark] = useLocalStorageState<boolean>("isDark", { defaultValue: true });
+  const [isDark, setIsDark] = useLocalStorageState<boolean>("isDark", { defaultValue: false });
   const [progress, setProgress] = useState();
   useEffect(() => {
     ConfigProvider.config({

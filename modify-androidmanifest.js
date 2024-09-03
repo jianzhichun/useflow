@@ -1,9 +1,9 @@
-const fs = require('fs');
-const path = require('path');
+import { readFileSync, writeFileSync } from 'fs';
+import { join } from 'path';
 
-const manifestPath = path.join(__dirname, 'android/app/src/main/AndroidManifest.xml');
+const manifestPath = join(__dirname, 'android/app/src/main/AndroidManifest.xml');
 
-let manifest = fs.readFileSync(manifestPath, 'utf8');
+let manifest = readFileSync(manifestPath, 'utf8');
 
 if (!manifest.includes('<uses-permission android:name="android.permission.CAMERA" />')) {
   manifest = manifest.replace(
@@ -14,4 +14,4 @@ if (!manifest.includes('<uses-permission android:name="android.permission.CAMERA
   );
 }
 
-fs.writeFileSync(manifestPath, manifest);
+writeFileSync(manifestPath, manifest);

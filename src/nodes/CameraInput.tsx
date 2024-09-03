@@ -7,6 +7,7 @@ import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
 import { useTfjs } from '../components/Tfjs';
 import ResizableNode from '../components/ResizableNode';
 import { useForm } from 'antd/es/form/Form';
+import { requestCameraPermission } from '../components/Utils';
 
 export function CameraInput({ id, selected, data }: NodeProps<Node<any, 'camera-input'>>) {
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
@@ -21,6 +22,7 @@ export function CameraInput({ id, selected, data }: NodeProps<Node<any, 'camera-
       setDevices(videoDevices);
     }
     getDevices();
+    requestCameraPermission();
   }, []);
   useEffect(() => {
     if (data?.selectedDeviceId && tf) {
