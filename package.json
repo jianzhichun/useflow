@@ -1,6 +1,6 @@
 {
   "name": "useflow",
-  "version": "0.0.9",
+  "version": "0.0.13",
   "type": "module",
   "copyright": "金华岩石信息科技有限公司",
   "scripts": {
@@ -11,7 +11,7 @@
     "electron:build": "electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "git:publish": "set +e && VERSION=$(npx json -f package.json version) && git tag -d v$VERSION && git push origin :refs/tags/v$VERSION && git tag v$VERSION && git push origin v$VERSION"
+    "git:publish": "set +e && VERSION=$(npx json -f package.json version) && git tag v$VERSION && git push origin v$VERSION"
   },
   "dependencies": {
     "@capacitor/core": "^6.1.2",
