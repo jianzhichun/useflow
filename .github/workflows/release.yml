@@ -1,4 +1,4 @@
-name: Release PC
+name: Release
 
 on:
   push:
