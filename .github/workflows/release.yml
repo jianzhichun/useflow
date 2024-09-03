@@ -52,11 +52,7 @@ jobs:
       
       - name: Sign APK
         if: runner.os == 'macOS'
-        run: jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
-          -keystore my-release-key.keystore \
-          -storepass ${{ secrets.KEYSTORE_PASSWORD }} \
-          -keypass ${{ secrets.KEY_PASSWORD }} \
-          android/app/build/outputs/apk/release/app-release-unsigned.apk ${{ secrets.KEY_ALIAS }}
+        run: jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore my-release-key.keystore -storepass ${{ secrets.KEYSTORE_PASSWORD }} -keypass ${{ secrets.KEY_PASSWORD }} android/app/build/outputs/apk/release/app-release-unsigned.apk ${{ secrets.KEY_ALIAS }}
 
       - name: Align APK (optional but recommended)
         if: runner.os == 'macOS'
