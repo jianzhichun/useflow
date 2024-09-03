@@ -59,7 +59,9 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           ZIPALIGN=$(find $ANDROID_HOME/build-tools/ -name zipalign | sort | tail -n 1) 
-          $ZIPALIGN -v 4 android/app/build/outputs/apk/release/app-release-unsigned.apk electron-dist/app-release.apk
+          $ZIPALIGN -v 4 android/app/build/outputs/apk/release/app-release-unsigned.apk app-release.apk
+          mkdir -p electron-dist
+          mv app-release.apk electron-dist/
 
       - name: Build electron and Publish
         run: yarn electron:build --publish always
