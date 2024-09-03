@@ -41,6 +41,7 @@ jobs:
           api-level: 30
           target: android-30
           ndk: 21.4.7075529
+          build-tools: 30.0.3
 
       - name: Decode Keystore
         if: runner.os == 'macOS'
@@ -56,7 +57,9 @@ jobs:
 
       - name: Align APK (optional but recommended)
         if: runner.os == 'macOS'
-        run: ${ANDROID_HOME}/build-tools/30.0.3/zipalign -v 4 android/app/build/outputs/apk/release/app-release-unsigned.apk electron-dist/app-release.apk
+        run: |
+          ZIPALIGN=$(find $ANDROID_HOME/build-tools/ -name zipalign | sort | tail -n 1) 
+          $ZIPALIGN -v 4 android/app/build/outputs/apk/release/app-release-unsigned.apk electron-dist/app-release.apk
 
       - name: Build electron and Publish
         run: yarn electron:build --publish always
