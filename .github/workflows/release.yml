@@ -103,7 +103,7 @@ jobs:
         run: |
           if gh release view ${{ env.TAG_NAME }} -R jianzhichun/useflow-release >/dev/null 2>&1; then
             echo "Release ${{ env.TAG_NAME }} already exists. Uploading APK..."
-            gh release upload ${{ env.TAG_NAME }} useflow.apk -R jianzhichun/useflow-release
+            gh release upload ${{ env.TAG_NAME }} useflow.apk -R jianzhichun/useflow-release --clobber
           else
             echo "Creating new release ${{ env.TAG_NAME }} and uploading APK..."
             gh release create ${{ env.TAG_NAME }} useflow.apk -R jianzhichun/useflow-release --title "Release ${{ env.TAG_NAME }}" --notes "APK release"
