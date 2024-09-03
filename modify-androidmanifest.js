@@ -1,6 +1,9 @@
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 import { readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const manifestPath = join(__dirname, 'android/app/src/main/AndroidManifest.xml');
 
 let manifest = readFileSync(manifestPath, 'utf8');
