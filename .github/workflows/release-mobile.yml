@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-android:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -58,7 +58,7 @@ jobs:
           $ZIPALIGN -v 4 android/app/build/outputs/apk/release/app-release-unsigned.apk app-release.apk
 
       - name: Install GitHub CLI
-        run: sudo apt-get install -y gh
+        run: sudo apt-get install -y gh  # 在 Ubuntu 上使用 apt-get 安装 gh
       
       - name: Authenticate with GitHub for APK Publishing
         run: echo "${{ secrets.GH_TOKEN }}" | gh auth login --with-token
