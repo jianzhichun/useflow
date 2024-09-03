@@ -77,14 +77,17 @@ jobs:
           -storepass ${{ secrets.KEYSTORE_PASSWORD }} \
           -keypass ${{ secrets.KEY_PASSWORD }} \
           android/app/build/outputs/apk/release/app-release-unsigned.apk ${{ secrets.KEY_ALIAS }}
-
+      
+      - name: Verify APK Signature
+        run: jarsigner -verify -verbose -certs android/app/build/outputs/apk/release/app-release-unsigned.apk
+        
       - name: Align APK (optional but recommended)
         run: |
           ZIPALIGN=$(find $ANDROID_HOME/build-tools/ -name zipalign | sort | tail -n 1) 
           $ZIPALIGN -v 4 android/app/build/outputs/apk/release/app-release-unsigned.apk app-release.apk
 
       - name: Install GitHub CLI
-        run: sudo apt-get install -y gh  # 在 Ubuntu 上使用 apt-get 安装 gh
+        run: sudo apt-get install -y gh
       
       - name: Authenticate with GitHub for APK Publishing
         run: echo "${{ secrets.GH_TOKEN }}" | gh auth login --with-token
