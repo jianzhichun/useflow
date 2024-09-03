@@ -27,42 +27,6 @@ jobs:
       - name: Build the web assets
         run: yarn build
 
-      - name: Setup Java
-        if: runner.os == 'macOS'
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      
-      - name: Setup Android SDK
-        if: runner.os == 'macOS'
-        uses: android-actions/setup-android@v2
-        with:
-          api-level: 30
-          target: android-30
-          ndk: 21.4.7075529
-          build-tools: 30.0.3
-
-      - name: Decode Keystore
-        if: runner.os == 'macOS'
-        run: echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > my-release-key.keystore
-
-      - name: Build android
-        if: runner.os == 'macOS'
-        run: yarn android:build
-      
-      - name: Sign APK
-        if: runner.os == 'macOS'
-        run: jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore my-release-key.keystore -storepass ${{ secrets.KEYSTORE_PASSWORD }} -keypass ${{ secrets.KEY_PASSWORD }} android/app/build/outputs/apk/release/app-release-unsigned.apk ${{ secrets.KEY_ALIAS }}
-
-      - name: Align APK (optional but recommended)
-        if: runner.os == 'macOS'
-        run: |
-          ZIPALIGN=$(find $ANDROID_HOME/build-tools/ -name zipalign | sort | tail -n 1) 
-          $ZIPALIGN -v 4 android/app/build/outputs/apk/release/app-release-unsigned.apk app-release.apk
-          mkdir -p electron-dist
-          mv app-release.apk electron-dist/
-
       - name: Build electron and Publish
         run: yarn electron:build --publish always
         env:

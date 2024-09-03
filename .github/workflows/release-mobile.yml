@@ -1,0 +1,63 @@
+name: Release Mobile
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-android:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: yarn install
+      
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+        with:
+          api-level: 30
+          target: android-30
+          ndk: 21.4.7075529
+          build-tools: 30.0.3
+
+      - name: Decode Keystore
+        run: echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > my-release-key.keystore
+
+      - name: Build Android APK
+        run: yarn android:build
+      
+      - name: Sign APK
+        run: |
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
+          -keystore my-release-key.keystore \
+          -storepass ${{ secrets.KEYSTORE_PASSWORD }} \
+          -keypass ${{ secrets.KEY_PASSWORD }} \
+          android/app/build/outputs/apk/release/app-release-unsigned.apk ${{ secrets.KEY_ALIAS }}
+
+      - name: Align APK (optional but recommended)
+        run: |
+          ZIPALIGN=$(find $ANDROID_HOME/build-tools/ -name zipalign | sort | tail -n 1) 
+          $ZIPALIGN -v 4 android/app/build/outputs/apk/release/app-release-unsigned.apk app-release.apk
+
+      - name: Publish APK to Another Repository
+        uses: softprops/action-gh-release@v1
+        with:
+          files: app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_REPOSITORY: jianzhichun/useflow-release
