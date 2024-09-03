@@ -57,10 +57,22 @@ jobs:
           ZIPALIGN=$(find $ANDROID_HOME/build-tools/ -name zipalign | sort | tail -n 1) 
           $ZIPALIGN -v 4 android/app/build/outputs/apk/release/app-release-unsigned.apk app-release.apk
 
+      - name: Install GitHub CLI
+        run: sudo apt-get install -y gh
+      
+      - name: Authenticate with GitHub for APK Publishing
+        run: echo "${{ secrets.GH_TOKEN }}" | gh auth login --with-token
+      
+      - name: Extract Tag Name
+        id: extract_tag
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
       - name: Publish APK to Another Repository
-        uses: softprops/action-gh-release@v1
-        with:
-          files: app-release.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          GITHUB_REPOSITORY: jianzhichun/useflow-release
+        run: |
+          if gh release view ${{ env.TAG_NAME }} -R jianzhichun/useflow-release >/dev/null 2>&1; then
+            echo "Release ${{ env.TAG_NAME }} already exists. Uploading APK..."
+            gh release upload ${{ env.TAG_NAME }} app-release.apk -R jianzhichun/useflow-release
+          else
+            echo "Creating new release ${{ env.TAG_NAME }} and uploading APK..."
+            gh release create ${{ env.TAG_NAME }} app-release.apk -R jianzhichun/useflow-release --title "Release ${{ env.TAG_NAME }}" --notes "APK release"
+          fi
