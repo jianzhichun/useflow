@@ -19,8 +19,11 @@ jobs:
           node-version: '18'
       
       - name: Install dependencies
-        run: yarn install
-      
+        run: yarn
+        
+      - name: Build the web assets
+        run: yarn build
+  
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
