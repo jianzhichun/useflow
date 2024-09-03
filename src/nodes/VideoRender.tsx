@@ -265,7 +265,7 @@ export function VideoRender({ id, selected, data }: NodeProps<Node<any, 'video-r
         }
     }, [tf, canvasRef?.current])
     return (
-        <ResizableNode minWidth={220} data={data} selected={selected}>
+        <ResizableNode id={id} minWidth={220} data={data} selected={selected}>
             {(width) => <>
                 <UseHandle input={[{
                     id: "tensor", label: <span>

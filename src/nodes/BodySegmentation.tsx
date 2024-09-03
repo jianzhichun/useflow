@@ -38,7 +38,7 @@ export function BodySegmentation({ id, selected, data }: NodeProps<Node<any, 'bo
         }
     }, [tf, bodySegmenter]);
     return (
-        <ResizableNode data={data} selected={selected}>
+        <ResizableNode id={id} data={data} selected={selected}>
             {(width) => <>
                 <Instructions width={width}>![](./pose-detection-lib/blazepose.png)</Instructions>
                 <UseHandle

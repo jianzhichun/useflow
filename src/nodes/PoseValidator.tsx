@@ -638,7 +638,7 @@ export function PoseValidator({ id, selected, data }: NodeProps<Node<any, 'pose-
     const detector = usePoseDetector();
     const [form] = Form.useForm();
     const updateNodeInternals = useUpdateNodeInternals();
-    return <ResizableNode data={data} selected={selected}>
+    return <ResizableNode id={id} data={data} selected={selected}>
         {(width, height) => <>
             <UseHandle input={[{
                 id: "pose", label: <span>

@@ -16,7 +16,7 @@ export function Log({ id, selected, data }: NodeProps<Node<any, "log">>) {
         }
     }
     return (
-        <ResizableNode data={data} selected={selected}>
+        <ResizableNode id={id} data={data} selected={selected}>
             {() => <>
                 <UseHandle input={[{ id: "log", label: "日志" }]}></UseHandle>
                 {renderLog()}

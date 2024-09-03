@@ -646,7 +646,7 @@ export function HandPoseValidator({ id, selected, data }: NodeProps<Node<any, 'h
     const detector = useHandPoseDetector();
     const [form] = Form.useForm();
     const updateNodeInternals = useUpdateNodeInternals();
-    return <ResizableNode data={data} selected={selected}>
+    return <ResizableNode id={id} data={data} selected={selected}>
         {(width, height) => <>
             <UseHandle input={[{
                 id: "hands", label: <span>

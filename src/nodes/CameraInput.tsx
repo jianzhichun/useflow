@@ -80,7 +80,7 @@ export function CameraInput({ id, selected, data }: NodeProps<Node<any, 'camera-
   }, [tf, form, data?.selectedDeviceId, data?.isMirrored]);
 
   return (
-    <ResizableNode data={data} selected={selected}>
+    <ResizableNode id={id} data={data} selected={selected}>
       {(width) => <>
         <UseHandle output={[{ id: "tensor", label: "视频流" }]}></UseHandle>
         <Form colon style={{ width }} form={form}

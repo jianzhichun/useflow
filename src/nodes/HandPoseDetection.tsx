@@ -32,7 +32,7 @@ export function HandPoseDetection({ id, selected, data }: NodeProps<Node<any, 'h
         }
     }, [detector]);
     return (
-        <ResizableNode data={data} selected={selected}>
+        <ResizableNode id={id} data={data} selected={selected}>
             {(width) => <>
                 <Instructions width={width}>![](./pose-detection-lib/blazepose.png)</Instructions>
                 <UseHandle

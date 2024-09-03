@@ -155,7 +155,7 @@ export function DingTalkRobot({ id, selected, data }: NodeProps<Node<any, 'dingt
     const [form] = useForm();
     const updateNodeInternals = useUpdateNodeInternals();
     return (
-        <ResizableNode data={data} selected={selected}>
+        <ResizableNode id={id} data={data} selected={selected}>
             {() => <>
                 <Form
                     form={form}

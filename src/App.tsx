@@ -131,20 +131,16 @@ export default function App() {
   const [progress, setProgress] = useState();
   useEffect(() => {
     ConfigProvider.config({
-      holderRender: (children) => (
-        <ConfigProvider
-          theme={{ algorithm: [isDark ? theme.darkAlgorithm : theme.defaultAlgorithm, theme.compactAlgorithm] }}
-        >{children}</ConfigProvider>
-      ),
+      holderRender: (children) => <ConfigProvider
+        theme={{ algorithm: [isDark ? theme.darkAlgorithm : theme.defaultAlgorithm, theme.compactAlgorithm] }}
+      >{children}</ConfigProvider>,
     });
   }, [isDark]);
   useEffect(() => {
     if ((window as any).electron) {
       const { ipcRenderer } = (window as any).electron;
       ipcRenderer.on('update-progress', (_: any, { percent }: any) => setProgress(percent));
-      return () => {
-        ipcRenderer.removeAllListeners('update-progress');
-      };
+      return () => ipcRenderer.removeAllListeners('update-progress');
     }
   }, []);
   const steps = useMemo(() => Math.ceil(window.innerWidth / 4), [window.innerWidth]);

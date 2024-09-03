@@ -149,7 +149,7 @@ export function ActionArrangement({ id, selected, data }: NodeProps<Node<any, 'a
         }, { equalityFn: isEqual });
     }, [form]);
     return (
-        <ResizableNode data={data} selected={selected}>
+        <ResizableNode id={id} data={data} selected={selected}>
             {() => <>
                 <UseHandle output={[{ id: 'frame', label: '信息帧' }]} />
                 <Form

@@ -1,5 +1,6 @@
-import type {  EdgeTypes } from '@xyflow/react';
+import type { EdgeTypes } from '@xyflow/react';
+import EdgeWithDeleteIcon from './EdgeWithDeleteIcon';
 
 export const edgeTypes = {
-  // Add your custom edge types here!
+  "edge-with-delete-icon": EdgeWithDeleteIcon
 } satisfies EdgeTypes;

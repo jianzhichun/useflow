@@ -24,7 +24,7 @@ import { nodeTypes } from '../nodes';
 import { edgeTypes } from '../edges';
 import ContextMenu from '../components/ContextMenu';
 import { ExportOutlined, ImportOutlined, MoonOutlined, RedoOutlined, RestOutlined, SaveOutlined, SunOutlined, UndoOutlined } from '@ant-design/icons';
-import { useDebounce, useDeepCompareEffect, useKeyPress, useLocalStorageState } from 'ahooks';
+import { useDebounce, useKeyPress } from 'ahooks';
 import { usePermission, useResetLicense } from '../components/WithPermission';
 import { decrypt, encrypt } from '../components/Utils';
 import moment from 'moment';
@@ -139,7 +139,7 @@ export function UseFlow({ titleRender, isDark, setIsDark, title, nodes, edges, s
     useKeyPress(['meta.s', 'ctrl.s'], saveWithMessage, { exactMatch: true, useCapture: true });
     useEffect(() => useRuntimeNodeStore.setState({ edges }), [edges]);
     const onConnect: OnConnect = useCallback((connection) => {
-        setEdges((edges) => addEdge(connection, edges));
+        setEdges((edges) => addEdge({ ...connection, type: 'edge-with-delete-icon' }, edges));
         updateNodeInternals(connection.target);
     }, []);
     const onContextMenu = useCallback((event: any) => {
