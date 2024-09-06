@@ -35,6 +35,7 @@ import {
   generateNewNode,
   getNodesConnectedSourceOrTargetHandleIdsMap,
 } from "../utils";
+import { useWorkflow } from "./use-workflow";
 import { OnNodeAdd } from "@/types/workflow";
 
 export const useNodesInteractions = () => {
@@ -46,6 +47,8 @@ export const useNodesInteractions = () => {
     x: number;
     y: number;
   });
+
+  const { getAfterNodesInSameBranch } = useWorkflow();
 
   const { saveStateToHistory, undo, redo } = useWorkflowHistory();
 
@@ -213,6 +216,8 @@ export const useNodesInteractions = () => {
       },
       { prevNodeId, prevNodeSourceHandle, nextNodeId, nextNodeTargetHandle }
     ) => {
+      // if (getNodesReadOnly()) return;
+
       const { getNodes, setNodes, edges, setEdges } = store.getState();
       const nodes = getNodes();
       const nodesWithSameType = nodes.filter(
@@ -294,6 +299,9 @@ export const useNodesInteractions = () => {
                 ...nodesConnectedSourceOrTargetHandleIdsMap[node.id],
               };
             }
+
+            if (prevNode.parentId === node.id)
+              node.data._children?.push(newNode.id);
           });
           draft.push(newNode);
         });
@@ -309,7 +317,200 @@ export const useNodesInteractions = () => {
         });
         setEdges(newEdges);
       }
-      saveStateToHistory(WorkflowHistoryEvent.NodeAdd)
+      if (!prevNodeId && nextNodeId) {
+        const nextNodeIndex = nodes.findIndex((node) => node.id === nextNodeId);
+        const nextNode = nodes[nextNodeIndex]!;
+        newNode.data._connectedSourceHandleIds = [sourceHandle];
+        newNode.data._connectedTargetHandleIds = [];
+        newNode.position = {
+          x: nextNode.position.x,
+          y: nextNode.position.y,
+        };
+        newNode.parentId = nextNode.parentId;
+        newNode.extent = nextNode.extent;
+        if (nextNode.parentId) {
+          newNode.data.isInIteration = true;
+          newNode.data.iteration_id = nextNode.parentId;
+          newNode.zIndex = ITERATION_CHILDREN_Z_INDEX;
+        }
+        if (nextNode.data.isIterationStart)
+          newNode.data.isIterationStart = true;
+
+        let newEdge;
+
+        newEdge = {
+          id: `${newNode.id}-${sourceHandle}-${nextNodeId}-${nextNodeTargetHandle}`,
+          type: "custom",
+          source: newNode.id,
+          sourceHandle,
+          target: nextNodeId,
+          targetHandle: nextNodeTargetHandle,
+          data: {
+            sourceType: newNode.data.type,
+            targetType: nextNode.data.type,
+            isInIteration: !!nextNode.parentId,
+            iteration_id: nextNode.parentId,
+            _connectedNodeIsSelected: true,
+          },
+          zIndex: nextNode.parentId ? ITERATION_CHILDREN_Z_INDEX : 0,
+        };
+
+        let nodesConnectedSourceOrTargetHandleIdsMap: Record<string, any>;
+        if (newEdge) {
+          nodesConnectedSourceOrTargetHandleIdsMap =
+            getNodesConnectedSourceOrTargetHandleIdsMap(
+              [{ type: "add", edge: newEdge }],
+              nodes
+            );
+        }
+
+        const afterNodesInSameBranch = getAfterNodesInSameBranch(nextNodeId!);
+        const afterNodesInSameBranchIds = afterNodesInSameBranch.map(
+          (node) => node.id
+        );
+        const newNodes = produce(nodes, (draft) => {
+          draft.forEach((node) => {
+            node.data.selected = false;
+
+            if (afterNodesInSameBranchIds.includes(node.id))
+              node.position.x += NODE_WIDTH_X_OFFSET;
+
+            if (nodesConnectedSourceOrTargetHandleIdsMap?.[node.id]) {
+              node.data = {
+                ...node.data,
+                ...nodesConnectedSourceOrTargetHandleIdsMap[node.id],
+              };
+            }
+
+            if (nextNode.parentId === node.id)
+              node.data._children?.push(newNode.id);
+
+            if (node.data.start_node_id === nextNodeId) {
+              node.data.start_node_id = newNode.id;
+              node.data.startNodeType = newNode.data.type;
+            }
+
+            if (node.id === nextNodeId && node.data.isIterationStart)
+              node.data.isIterationStart = false;
+          });
+          draft.push(newNode);
+        });
+        setNodes(newNodes);
+        if (newEdge) {
+          const newEdges = produce(edges, (draft) => {
+            draft.forEach((item) => {
+              item.data = {
+                ...item.data,
+                _connectedNodeIsSelected: false,
+              };
+            });
+            draft.push(newEdge);
+          });
+          setEdges(newEdges);
+        }
+      }
+      if (prevNodeId && nextNodeId) {
+        const prevNode = nodes.find((node) => node.id === prevNodeId)!;
+        const nextNode = nodes.find((node) => node.id === nextNodeId)!;
+
+        newNode.data._connectedTargetHandleIds = [targetHandle];
+        newNode.data._connectedSourceHandleIds = [sourceHandle];
+        newNode.position = {
+          x: nextNode.position.x,
+          y: nextNode.position.y,
+        };
+        newNode.parentId = prevNode.parentId;
+        newNode.extent = prevNode.extent;
+        if (prevNode.parentId) {
+          newNode.data.isInIteration = true;
+          newNode.data.iteration_id = prevNode.parentId;
+          newNode.zIndex = ITERATION_CHILDREN_Z_INDEX;
+        }
+
+        const currentEdgeIndex = edges.findIndex(
+          (edge) => edge.source === prevNodeId && edge.target === nextNodeId
+        );
+        const newPrevEdge = {
+          id: `${prevNodeId}-${prevNodeSourceHandle}-${newNode.id}-${targetHandle}`,
+          type: "custom",
+          source: prevNodeId,
+          sourceHandle: prevNodeSourceHandle,
+          target: newNode.id,
+          targetHandle,
+          data: {
+            sourceType: prevNode.data.type,
+            targetType: newNode.data.type,
+            isInIteration: !!prevNode.parentId,
+            iteration_id: prevNode.parentId,
+            _connectedNodeIsSelected: true,
+          },
+          zIndex: prevNode.parentId ? ITERATION_CHILDREN_Z_INDEX : 0,
+        };
+        let newNextEdge: Edge | null = null;
+        newNextEdge = {
+          id: `${newNode.id}-${sourceHandle}-${nextNodeId}-${nextNodeTargetHandle}`,
+          type: "custom",
+          source: newNode.id,
+          sourceHandle,
+          target: nextNodeId,
+          targetHandle: nextNodeTargetHandle,
+          data: {
+            sourceType: newNode.data.type,
+            targetType: nextNode.data.type,
+            isInIteration: !!nextNode.parentId,
+            iteration_id: nextNode.parentId,
+            _connectedNodeIsSelected: true,
+          },
+          zIndex: nextNode.parentId ? ITERATION_CHILDREN_Z_INDEX : 0,
+        };
+        const nodesConnectedSourceOrTargetHandleIdsMap =
+          getNodesConnectedSourceOrTargetHandleIdsMap(
+            [
+              { type: "remove", edge: edges[currentEdgeIndex] },
+              { type: "add", edge: newPrevEdge },
+              ...(newNextEdge ? [{ type: "add", edge: newNextEdge }] : []),
+            ],
+            [...nodes, newNode]
+          );
+
+        const afterNodesInSameBranch = getAfterNodesInSameBranch(nextNodeId!);
+        const afterNodesInSameBranchIds = afterNodesInSameBranch.map(
+          (node) => node.id
+        );
+        const newNodes = produce(nodes, (draft) => {
+          draft.forEach((node) => {
+            node.data.selected = false;
+
+            if (nodesConnectedSourceOrTargetHandleIdsMap[node.id]) {
+              node.data = {
+                ...node.data,
+                ...nodesConnectedSourceOrTargetHandleIdsMap[node.id],
+              };
+            }
+            if (afterNodesInSameBranchIds.includes(node.id))
+              node.position.x += NODE_WIDTH_X_OFFSET;
+
+            if (prevNode.parentId === node.id)
+              node.data._children?.push(newNode.id);
+          });
+          draft.push(newNode);
+        });
+        setNodes(newNodes);
+        const newEdges = produce(edges, (draft) => {
+          draft.splice(currentEdgeIndex, 1);
+          draft.forEach((item) => {
+            item.data = {
+              ...item.data,
+              _connectedNodeIsSelected: false,
+            };
+          });
+          draft.push(newPrevEdge);
+
+          if (newNextEdge) draft.push(newNextEdge);
+        });
+        setEdges(newEdges);
+      }
+      saveStateToHistory(WorkflowHistoryEvent.NodeAdd);
     },
     [store, t, saveStateToHistory, workflowStore]
   );

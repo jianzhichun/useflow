@@ -80,6 +80,10 @@ export const NODES_EXTRA_DATA: Record<BlockEnum, NodesExtraData> = {
 
 export const CUSTOM_NODE = 'custom'
 
+export const SUPPORT_OUTPUT_VARS_NODE = [
+  BlockEnum.Start,
+]
+
 export const START_INITIAL_POSITION = { x: 80, y: 282 }
 export const AUTO_LAYOUT_OFFSET = {
   x: -42,

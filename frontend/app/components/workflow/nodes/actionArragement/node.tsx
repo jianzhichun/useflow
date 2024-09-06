@@ -2,12 +2,12 @@ import type { FC } from 'react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import InputVarTypeIcon from '../_base/components/input-var-type-icon'
-import type { CameraNodeType } from './types'
+import type { ActionArrangement } from './types'
 import { Variable02 } from '@/app/components/base/icons/src/vender/solid/development'
 import type { NodeProps } from '@/app/components/workflow/types'
 const i18nPrefix = 'workflow.nodes.start'
 
-const CameraNodeType: FC<NodeProps<CameraNodeType>> = ({
+const ActionArrangement: FC<NodeProps<ActionArrangement>> = ({
   data,
 }) => {
   return (
@@ -18,4 +18,4 @@ const CameraNodeType: FC<NodeProps<CameraNodeType>> = ({
   )
 }
 
-export default React.memo(CameraNodeType)
+export default React.memo(ActionArrangement)

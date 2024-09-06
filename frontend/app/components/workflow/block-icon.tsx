@@ -22,11 +22,11 @@ const ICON_CONTAINER_CLASSNAME_SIZE_MAP: Record<string, string> = {
 const getIcon = (type: BlockEnum, className: string) => {
   return {
     [BlockEnum.Start]: <Home className={className} />,
-    [BlockEnum.CameraInput]: <Llm className={className} />,
-    [BlockEnum.PoseDetection]: <Llm className={className} />,
-    [BlockEnum.CustomPose]: <Llm className={className} />,
-    [BlockEnum.ActionArragement]: <Llm className={className} />,
-    [BlockEnum.VideoRender]: <Llm className={className} />,
+    [BlockEnum.CameraInput]: <Home className={className} />,
+    [BlockEnum.PoseDetection]: <Home className={className} />,
+    [BlockEnum.CustomPose]: <Home className={className} />,
+    [BlockEnum.ActionArragement]: <Home className={className} />,
+    [BlockEnum.VideoRender]: <Home className={className} />,
     [BlockEnum.End]: <End className={className} />,
   }[type]
 }

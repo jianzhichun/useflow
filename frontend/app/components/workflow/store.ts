@@ -18,6 +18,7 @@ type PreviewRunningData = WorkflowRunningData & {
 }
 
 type Shape = {
+  panelWidth: number;
   panelMenu?: {
     top: number
     left: number
@@ -26,17 +27,30 @@ type Shape = {
   candidateNode?: Node;
   setCandidateNode: (candidateNode?: Node) => void;
   mousePosition: { pageX: number; pageY: number; elementX: number; elementY: number }
-  setMousePosition: (mousePosition: Shape['mousePosition']) => void
+  setMousePosition: (mousePosition: Shape['mousePosition']) => void;
+  nodeAnimation: boolean
+  setNodeAnimation: (nodeAnimation: boolean) => void;
+  nodeMenu?: {
+    top: number
+    left: number
+    nodeId: string
+  }
+  setNodeMenu: (nodeMenu: Shape['nodeMenu']) => void
 }
 
 export const createWorkflowStore = () => {
   return createStore<Shape>(set => ({
+    panelWidth: localStorage.getItem('workflow-node-panel-width') ? parseFloat(localStorage.getItem('workflow-node-panel-width')!) : 420,
     panelMenu: undefined,
     setPanelMenu: panelMenu => set(() => ({ panelMenu })),
     candidateNode: undefined,
     setCandidateNode: candidateNode => set(() => ({ candidateNode })),
     mousePosition: { pageX: 0, pageY: 0, elementX: 0, elementY: 0 },
     setMousePosition: mousePosition => set(() => ({ mousePosition })),
+    nodeAnimation: false,
+    setNodeAnimation: nodeAnimation => set(() => ({ nodeAnimation })),
+    nodeMenu: undefined,
+    setNodeMenu: nodeMenu => set(() => ({ nodeMenu })),
   }))
 }
 

@@ -27,4 +27,13 @@ export default {
     actionArrangement: '行为编排',
     videoRender: '视频渲染',
   },
+  blocksAbout: {
+    start: '开始',
+    end: '结束',
+    cameraInput: '摄像头输入',
+    poseDetection: '姿势识别',
+    customPose: '自定义姿势',
+    actionArrangement: '行为编排',
+    videoRender: '视频渲染',
+  }
 };
