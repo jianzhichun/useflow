@@ -28,7 +28,7 @@ export function PoseDetection({ id, selected, data }: NodeProps<Node<any, 'pose-
                         if (poses.length > 0) {
                             for (const pose of poses) {
                                 if (pose.keypoints != null) {
-                                    setRuntimeNodeData({ pose });
+                                    setRuntimeNodeData({ pose: { ...pose, shape: tensor.shape } });
                                     break;
                                 }
                             }
@@ -50,7 +50,7 @@ export function PoseDetection({ id, selected, data }: NodeProps<Node<any, 'pose-
                 />
                 <Form
                     style={{ width }}
-                    
+
                     form={form}
                     initialValues={data}
                     autoComplete="off"

@@ -285,11 +285,11 @@ function JointSelect({ onChange, value, nodeId, poseScoreThreshold }: any) {
 function mapToZeroOne(x: number) {
     return (x + 1) / 2;
 }
-function normalizeWeights(weights: number[]) {
+export function normalizeWeights(weights: number[]) {
     const total = weights.reduce((sum, weight) => sum + weight, 0);
     return weights.map(weight => weight / total);
 }
-function weightedCosineSimilarity(A: number[], B: number[], weights: number[]) {
+export function weightedCosineSimilarity(A: number[], B: number[], weights: number[]) {
     let dotProduct = 0;
     let normA = 0;
     let normB = 0;
@@ -301,7 +301,7 @@ function weightedCosineSimilarity(A: number[], B: number[], weights: number[]) {
     const denominator = Math.sqrt(normA) * Math.sqrt(normB);
     return mapToZeroOne(dotProduct / denominator);
 }
-function weightedJaccardSimilarity(A: number[], B: number[], weights: number[]) {
+export function weightedJaccardSimilarity(A: number[], B: number[], weights: number[]) {
     let intersection = 0;
     let union = 0;
 
@@ -317,7 +317,7 @@ function weightedMean(arr: number[], weights: number[]) {
     const sumWeightedValues = arr.reduce((sum, val, i) => sum + val * weights[i], 0);
     return sumWeightedValues / totalWeight;
 }
-function weightedPearsonSimilarity(A: number[], B: number[], weights: number[]) {
+export function weightedPearsonSimilarity(A: number[], B: number[], weights: number[]) {
     const meanX = weightedMean(A, weights);
     const meanY = weightedMean(B, weights);
 
@@ -337,19 +337,17 @@ function weightedPearsonSimilarity(A: number[], B: number[], weights: number[]) 
 
     return mapToZeroOne(weightedCovariance / Math.sqrt(weightedVarianceX * weightedVarianceY));
 }
-function weightedManhattanSimilarity(A: number[], B: number[], weights: number[]) {
+export function weightedManhattanSimilarity(A: number[], B: number[], weights: number[], maxDistanceOption: number = 180) {
     let weightedDistance = 0;
     let maxDistance = 0;
-
     for (let i = 0; i < A.length; i++) {
         const weight = weights[i];
         weightedDistance += weight * Math.abs(A[i] - B[i]);
-        maxDistance += weight * Math.max(B[i], 180 - B[i]);
+        maxDistance += weight * Math.max(B[i], maxDistanceOption - B[i]);
     }
-
     return 1 - weightedDistance / maxDistance;
 }
-const algorithmFuns: Record<string, (A: number[], B: number[], weights: number[]) => number> = {
+export const algorithmFuns: Record<string, (A: number[], B: number[], weights: number[]) => number> = {
     "cosine": weightedCosineSimilarity,
     "jaccard": weightedJaccardSimilarity,
     "pearson": weightedPearsonSimilarity,

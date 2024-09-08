@@ -50,7 +50,6 @@ export function BodySegmentation({ id, selected, data }: NodeProps<Node<any, 'bo
                 />
                 <Form
                     style={{ width }}
-                    
                     form={form}
                     initialValues={data}
                     autoComplete="off"

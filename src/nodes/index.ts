@@ -10,6 +10,8 @@ import { BodySegmentation } from './BodySegmentation';
 import { HandPoseDetection } from './HandPoseDetection';
 import { HandPoseValidator } from './HandPoseValidator';
 import { DingTalkRobot } from './DingTalkRobot';
+import { JointOffset } from './JointOffset';
+import { FrameCrop } from './FrameCrop';
 
 export const nodeTypes = {
   'camera-input': Object.assign(CameraInput, {
@@ -17,6 +19,15 @@ export const nodeTypes = {
     defaultData() {
       return {
         label: '摄像头输入',
+      }
+    }
+  }),
+  'frame-crop': Object.assign(FrameCrop, {
+    category: "流式输入输出",
+    defaultData() {
+      return {
+        label: '区域切割',
+        isPreview: true
       }
     }
   }),
@@ -123,9 +134,17 @@ export const nodeTypes = {
     defaultData() {
       return {
         label: '钉钉机器人',
-        msgs:[{
+        msgs: [{
           type: 'score'
         }]
+      }
+    }
+  }),
+  'joint-offset': Object.assign(JointOffset, {
+    category: "动作识别",
+    defaultData() {
+      return {
+        label: '关节偏移',
       }
     }
   }),
