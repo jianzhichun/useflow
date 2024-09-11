@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.22.3",
+    "@capacitor/core": "^6.1.2",
     "@dagrejs/dagre": "^1.1.2",
     "@emoji-mart/data": "^1.1.2",
     "@floating-ui/react": "^0.25.2",
