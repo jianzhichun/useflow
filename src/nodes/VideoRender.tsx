@@ -106,6 +106,15 @@ function drawTextWithPosition(ctx: CanvasRenderingContext2D, text: string, posit
     });
 }
 
+function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
 function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any) {
     const [configVisible, setConfigVisible] = useState(false);
     const throttledText = customThrottle(
@@ -115,6 +124,7 @@ function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any) {
         1000
     );
     useDeepCompareEffect(() => {
+        const targetColors: any = {};
         return useRuntimeNodeStore.subscribe(state => state.get(nodeId, `param${idx}`), param => {
             if (param) {
                 const ctx = canvas.getContext("2d");
@@ -146,6 +156,27 @@ function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any) {
                                 }
                             }
                             break;
+                        case "objects":
+                            const predictions = param as any[];
+                            predictions.forEach(prediction => {
+                                const { target, age, hits } = prediction;
+                                const [x, y, width, height] = prediction.bbox;
+                                const text = `${prediction.class}: ${(prediction.score * 100).toFixed(2)}%`;
+                                let color;
+                                if (target in targetColors) {
+                                    color = targetColors[target];
+                                } else {
+                                    color = getRandomColor();
+                                    targetColors[target] = color;
+                                }
+                                ctx.strokeStyle = color;
+                                ctx.lineWidth = 2;
+                                ctx.strokeRect(x, y, width, height);
+                                ctx.fillStyle = color;
+                                ctx.font = '18px Arial';
+                                ctx.fillText(text, x, y > 10 ? y - 5 : 10);
+                            });
+                            break;
                         case "scoreInfoFrame":
                             let text = '';
                             if (obj.drawName && param.name) {
@@ -172,15 +203,16 @@ function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any) {
             <UseHandle input={[{
                 id: `param${idx}`, label: <>
                     参数{idx + 1}
-                    <Button  type="link" onClick={() => setConfigVisible(old => !old)}>
+                    <Button type="link" onClick={() => setConfigVisible(old => !old)}>
                         配置
                     </Button>
                 </>
             }]} />
             <Form.Item {...restField} className="nodrag nopan" name={[idx, "type"]}>
-                <Select style={{ minWidth: 90 }}  options={[
+                <Select style={{ minWidth: 90 }} options={[
                     { label: "姿态数据", value: "pose" },
                     { label: "手势数据", value: "hands" },
+                    { label: "对象数据", value: "objects" },
                     { label: "得分信息帧", value: "scoreInfoFrame" }
                 ]} />
             </Form.Item>
@@ -195,7 +227,7 @@ function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any) {
                                 <Switch />
                             </Form.Item>
                             <Form.Item {...restField} className="nodrag nopan" name={[idx, "excludeKeypoints"]} label="排除关节">
-                                <Select  optionFilterProp="label" allowClear mode='multiple' options={poseJoint}></Select>
+                                <Select optionFilterProp="label" allowClear mode='multiple' options={poseJoint}></Select>
                             </Form.Item>
                             <Form.Item {...restField} className="nodrag nopan" name={[idx, "drawSkeleton"]} label="绘制骨骼">
                                 <Switch />
@@ -207,6 +239,15 @@ function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any) {
                                 <Switch />
                             </Form.Item>
                             <Form.Item {...restField} className="nodrag nopan" name={[idx, "drawSkeleton"]} label="绘制骨骼">
+                                <Switch />
+                            </Form.Item>
+                        </>;
+                    case "objects":
+                        return <>
+                            <Form.Item {...restField} className="nodrag nopan" name={[idx, "drawBox"]} label="绘制边框">
+                                <Switch />
+                            </Form.Item>
+                            <Form.Item {...restField} className="nodrag nopan" name={[idx, "drawLabel"]} label="绘制标识">
                                 <Switch />
                             </Form.Item>
                         </>;
@@ -225,7 +266,7 @@ function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any) {
                                 <Switch />
                             </Form.Item>
                             <Form.Item {...restField} className="nodrag nopan" name={[idx, "drawFontSize"]} label="字体大小">
-                                <Select  options={[
+                                <Select options={[
                                     { label: "大", value: "28" },
                                     { label: "中", value: "20" },
                                     { label: "小", value: "11" },
@@ -236,7 +277,7 @@ function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any) {
                                 <ColorPicker />
                             </Form.Item>
                             <Form.Item {...restField} className="nodrag nopan" name={[idx, "drawPosition"]} label="绘制区域">
-                                <Select  options={[
+                                <Select options={[
                                     { label: "左上", value: "lt" },
                                     { label: "左下", value: "lb" },
                                     { label: "右上", value: "rt" },
@@ -274,24 +315,23 @@ export function VideoRender({ id, selected, data }: NodeProps<Node<any, 'video-r
                         const rgba = hexToRgba("#3C4F5B");
                         const colorTensor = tf.tensor(new Array(shape[0] * shape[1] * 4).fill(0).map((_, index) => rgba[index % 4]), shape, 'int32') as any;
                         toPixels(colorTensor, canvas).then(() => colorTensor.dispose());
-                    } else{
+                    } else {
                         toPixels(tensor, canvas);
                     }
                 }
             }, { equalityFn: isEqual });
         }
-    }, [tf, canvasRef?.current, data?.noVideo]);
+    }, [tf, data?.noVideo]);
     return (
         <ResizableNode id={id} minWidth={220} data={data} selected={selected}>
             {(width) => <>
                 <UseHandle input={[{
                     id: "tensor", label: <span>
                         视频流&nbsp;
-                        <Button type='dashed'  onClick={() => canvasRef.current && toggleCanvasFullScreen(canvasRef.current)} icon={<FullscreenOutlined />} >全屏</Button>
+                        <Button type='dashed' onClick={() => canvasRef.current && toggleCanvasFullScreen(canvasRef.current)} icon={<FullscreenOutlined />} >全屏</Button>
                     </span>
                 }]}></UseHandle>
-                <Form  className='nowheel' colon
-                    style={{ width }}
+                <Form className='nowheel' colon
                     form={form} initialValues={data}
                     onValuesChange={(changedValues, values) => {
                         Object.assign(data, values);

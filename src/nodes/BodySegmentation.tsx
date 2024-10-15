@@ -1,5 +1,5 @@
 import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import UseHandle from '../components/UseHandle';
 import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
 import Instructions from '../components/Instructions';
@@ -13,7 +13,8 @@ import { useTfjs } from '../components/Tfjs';
 import type { Node } from '@xyflow/react';
 
 export function BodySegmentation({ id, selected, data }: NodeProps<Node<any, 'body-segmentation'>>) {
-    const setRuntimeNodeData = useRuntimeNodeStore(state => (nodeData: any) => state.set(id, nodeData));
+    const setRuntimeNodeData_ = useRuntimeNodeStore((state) => (nodeData: any) => state.set(id, nodeData));
+    const setRuntimeNodeData = useCallback(setRuntimeNodeData_, [setRuntimeNodeData_]);
     const [form] = useForm();
     const tf = useTfjs();
     const updateNodeInternals = useUpdateNodeInternals();
@@ -49,7 +50,6 @@ export function BodySegmentation({ id, selected, data }: NodeProps<Node<any, 'bo
                     ]}
                 />
                 <Form
-                    style={{ width }}
                     form={form}
                     initialValues={data}
                     autoComplete="off"

@@ -1,6 +1,6 @@
 import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import UseHandle from '../components/UseHandle';
 import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
 import Instructions from '../components/Instructions';
@@ -12,7 +12,8 @@ import { useForm } from 'antd/es/form/Form';
 import { SupportedModels } from '@tensorflow-models/pose-detection';
 
 export function PoseDetection({ id, selected, data }: NodeProps<Node<any, 'pose-detection'>>) {
-    const setRuntimeNodeData = useRuntimeNodeStore(state => (nodeData: any) => state.set(id, nodeData));
+    const setRuntimeNodeData_ = useRuntimeNodeStore((state) => (nodeData: any) => state.set(id, nodeData));
+    const setRuntimeNodeData = useCallback(setRuntimeNodeData_, [setRuntimeNodeData_]);
     const [form] = useForm();
     const updateNodeInternals = useUpdateNodeInternals();
     const detector = usePoseDetector(SupportedModels.BlazePose, {
@@ -49,8 +50,6 @@ export function PoseDetection({ id, selected, data }: NodeProps<Node<any, 'pose-
                     ]}
                 />
                 <Form
-                    style={{ width }}
-
                     form={form}
                     initialValues={data}
                     autoComplete="off"

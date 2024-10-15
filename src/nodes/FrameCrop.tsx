@@ -2,7 +2,7 @@ import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
 import ResizableNode from '../components/ResizableNode';
 import UseHandle from '../components/UseHandle';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toPixels, useTfjs } from '../components/Tfjs';
 import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
 import { isEqual } from 'lodash';
@@ -43,7 +43,8 @@ function Crop({ idx, restField, remove, maxWidth, maxHeight }: any) {
     </>;
 }
 export function FrameCrop({ id, selected, data }: NodeProps<Node<any, 'frame-crop'>>) {
-    const setRuntimeNodeData = useRuntimeNodeStore(state => (nodeData: any) => state.set(id, nodeData));
+    const setRuntimeNodeData_ = useRuntimeNodeStore((state) => (nodeData: any) => state.set(id, nodeData));
+    const setRuntimeNodeData = useCallback(setRuntimeNodeData_, [setRuntimeNodeData_]);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const updateNodeInternals = useUpdateNodeInternals();
     const tf = useTfjs();
@@ -92,7 +93,6 @@ export function FrameCrop({ id, selected, data }: NodeProps<Node<any, 'frame-cro
                 <label>高x宽：</label>{inputTensorShape?.[0]}x{inputTensorShape?.[1]}
             </Flex>
             <Form
-                style={{ width }}
                 initialValues={data}
                 autoComplete="off"
                 onValuesChange={(changedValues, values) => {

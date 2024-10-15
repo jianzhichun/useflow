@@ -4,7 +4,7 @@ import UseHandle from "../components/UseHandle";
 import { useForm } from "antd/es/form/Form";
 import { Button, Flex, Form, Input, InputNumber, Select, Space } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { isEqual } from "lodash";
 import "./ActionArrangement.css"
 import ResizableNode from "../components/ResizableNode";
@@ -84,7 +84,8 @@ function formatScore(scoreFormat: string, score: number) {
 export function ActionArrangement({ id, selected, data }: NodeProps<Node<any, 'action-arrangement'>>) {
     const [form] = useForm();
     const updateNodeInternals = useUpdateNodeInternals();
-    const setRuntimeNodeData = useRuntimeNodeStore((state) => (nodeData: any) => state.set(id, nodeData));
+    const setRuntimeNodeData_ = useRuntimeNodeStore((state) => (nodeData: any) => state.set(id, nodeData));
+    const setRuntimeNodeData = useCallback(setRuntimeNodeData_, [setRuntimeNodeData_]);
     useEffect(() => {
         if (!form) {
             return;

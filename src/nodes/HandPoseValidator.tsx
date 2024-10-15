@@ -1,7 +1,7 @@
 import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
 import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Upload, Image as AntdImage, Form, Slider, Select, Popover, Space, Button, Flex, InputNumber, message } from 'antd';
 import { LineChartOutlined, MinusCircleOutlined, PlusOutlined, UnorderedListOutlined, UploadOutlined } from '@ant-design/icons';
 import { drawKeypoints, useHandPoseDetector } from '../components/HandPoseDetector';
@@ -13,6 +13,7 @@ import ResizableNode from '../components/ResizableNode';
 import { useDeepCompareEffect } from 'ahooks';
 import UseHandle from '../components/UseHandle';
 import { Hand, Keypoint } from '@tensorflow-models/hand-pose-detection';
+import { isEqual } from 'lodash';
 
 
 function calculate3DAngle(a: posedetection.Keypoint, b: posedetection.Keypoint, c: posedetection.Keypoint): number {
@@ -227,7 +228,7 @@ function RealTimeAngle({ nodeId, option }: any) {
                 realtimeJointAngle = calculate3DAngle(keypoints[angleCompose[0]], keypoints[angleCompose[1]], keypoints[angleCompose[2]]);
             }
             setRealtimeJointAngleStr(realtimeJointAngle === Infinity ? "不可信" : (realtimeJointAngle && realtimeJointAngle.toFixed(1)) + "°");
-        });
+        }, { equalityFn: isEqual });
     }, []);
 
     return realtimeJointAngleStr;
@@ -236,7 +237,7 @@ function JointSelect({ onChange, value, nodeId }: any) {
     const [open, setOpen] = useState(false);
     const hands = useRef<any>();
     useEffect(() => {
-        return useRuntimeNodeStore.subscribe((state) => state.get(nodeId, "hands"), (hands_) => hands.current = hands_);
+        return useRuntimeNodeStore.subscribe((state) => state.get(nodeId, "hands"), (hands_) => hands.current = hands_, { equalityFn: isEqual });
     }, []);
     return <Select  style={{ maxWidth: 310 }} value={value} onChange={(v: string[]) => {
         onChange(v.map(key => {
@@ -592,7 +593,8 @@ function ScoreAlgorithmSelect({ onChange, value }: any) {
 }
 function Score({ nodeId, scoreAlgorithm }: any) {
     const score = useRef<number | null>(null);
-    const setRuntimeNodeData = useRuntimeNodeStore((state) => (nodeData: any) => state.set(nodeId, nodeData));
+    const setRuntimeNodeData_ = useRuntimeNodeStore((state) => (nodeData: any) => state.set(nodeId, nodeData));
+    const setRuntimeNodeData = useCallback(setRuntimeNodeData_, [setRuntimeNodeData_]);
     useDeepCompareEffect(() => {
         return useRuntimeNodeStore.subscribe(state => state.get(nodeId, "hands"), (hands: Hand[]) => {
             if (hands && scoreAlgorithm?.algorithm && scoreAlgorithm?.weights) {
@@ -636,7 +638,7 @@ function Score({ nodeId, scoreAlgorithm }: any) {
                 score.current = Math.max(0, score_);
                 setRuntimeNodeData({ score: score_ });
             }
-        });
+        }, { equalityFn: isEqual });
     }, [scoreAlgorithm]);
     return score.current && score.current.toFixed(1);
 }

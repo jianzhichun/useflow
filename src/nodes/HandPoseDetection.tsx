@@ -1,6 +1,6 @@
 import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import UseHandle from '../components/UseHandle';
 import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
 import Instructions from '../components/Instructions';
@@ -12,7 +12,8 @@ import { useHandPoseDetector } from '../components/HandPoseDetector';
 import { SupportedModels } from '@tensorflow-models/hand-pose-detection';
 
 export function HandPoseDetection({ id, selected, data }: NodeProps<Node<any, 'hand-pose-detection'>>) {
-    const setRuntimeNodeData = useRuntimeNodeStore(state => (nodeData: any) => state.set(id, nodeData));
+    const setRuntimeNodeData_ = useRuntimeNodeStore((state) => (nodeData: any) => state.set(id, nodeData));
+    const setRuntimeNodeData = useCallback(setRuntimeNodeData_, [setRuntimeNodeData_]);
     const [form] = useForm();
     const updateNodeInternals = useUpdateNodeInternals();
     const detector = useHandPoseDetector(SupportedModels.MediaPipeHands, {
@@ -42,8 +43,6 @@ export function HandPoseDetection({ id, selected, data }: NodeProps<Node<any, 'h
                     ]}
                 />
                 <Form
-                    style={{ width }}
-                    
                     form={form}
                     initialValues={data}
                     autoComplete="off"

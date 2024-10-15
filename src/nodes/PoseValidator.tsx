@@ -1,7 +1,7 @@
 import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
 import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Upload, Image as AntdImage, Form, Slider, Select, Popover, Space, Button, Flex, InputNumber, message } from 'antd';
 import { LineChartOutlined, MinusCircleOutlined, PlusOutlined, UnorderedListOutlined, UploadOutlined } from '@ant-design/icons';
 import { drawKeypoints, drawSkeleton, usePoseDetector } from '../components/PoseDetector';
@@ -12,7 +12,40 @@ import * as posedetection from '@tensorflow-models/pose-detection';
 import ResizableNode from '../components/ResizableNode';
 import { useDeepCompareEffect } from 'ahooks';
 import UseHandle from '../components/UseHandle';
+import { poseJoint } from './VideoRender';
+import { isEqual } from 'lodash';
 
+
+
+function calculateDistance(keypoint: posedetection.Keypoint, bbox: [number, number, number, number]) {
+    const [x, y, width, height] = bbox;
+
+    // 获取边界框的四个边的位置
+    const left = x;
+    const top = y;
+    const right = x + width;
+    const bottom = y + height;
+
+    // 获取关键点的坐标
+    const [keypointX, keypointY] = [keypoint.x, keypoint.y];
+
+    // 检查关键点是否在边界框内部
+    const isInside = keypointX >= left && keypointX <= right && keypointY >= top && keypointY <= bottom;
+
+    // 如果关键点在框内，则返回 0
+    if (isInside) {
+        return Number.MIN_VALUE;
+    }
+
+    // 如果关键点在框外，计算到四条边的最近距离
+    const distanceToLeft = keypointX < left ? left - keypointX : Infinity;
+    const distanceToRight = keypointX > right ? keypointX - right : Infinity;
+    const distanceToTop = keypointY < top ? top - keypointY : Infinity;
+    const distanceToBottom = keypointY > bottom ? keypointY - bottom : Infinity;
+
+    // 返回最近边的距离
+    return Math.min(distanceToLeft, distanceToRight, distanceToTop, distanceToBottom);
+}
 
 function calculate3DAngle(a: posedetection.Keypoint, b: posedetection.Keypoint, c: posedetection.Keypoint, poseScoreThreshold: number): number {
     if ((a.score && a.score < poseScoreThreshold) || (b.score && b.score < poseScoreThreshold) || (c.score && c.score < poseScoreThreshold)) {
@@ -230,14 +263,14 @@ function RealTimeAngle({ nodeId, option, poseScoreThreshold }: any) {
                 realtimeJointAngle = calculate3DAngle(keypoints[angleCompose[0]], keypoints[angleCompose[1]], keypoints[angleCompose[2]], poseScoreThreshold);
             }
             setRealtimeJointAngleStr(realtimeJointAngle === Infinity ? "不可信" : (realtimeJointAngle && realtimeJointAngle.toFixed(1)) + "°");
-        });
+        }, { equalityFn: isEqual });
     }, []);
 
     return realtimeJointAngleStr;
 }
 function JointSelect({ onChange, value, nodeId, poseScoreThreshold }: any) {
     const [open, setOpen] = useState(false);
-    return <Select  style={{ maxWidth: 310 }} value={value} onChange={(v: string[]) => {
+    return <Select style={{ maxWidth: 310 }} value={value} onChange={(v: string[]) => {
         onChange(v.map(key => {
             const item = value && value.find((item: any) => item.value === key);
             if (!item) {
@@ -255,7 +288,7 @@ function JointSelect({ onChange, value, nodeId, poseScoreThreshold }: any) {
         allowClear labelRender={(option: any) => {
             const jointAngle = value && value.find(({ value }: any) => value === option.value)?.angle || 0;
             return <Popover content={<div onMouseDown={(e) => e.stopPropagation()} style={{ width: 300 }}>
-                <Form  colon>
+                <Form colon>
                     <Form.Item label="角度">
                         <Slider value={jointAngle} onChange={(v) => {
                             onChange(value.map((item: any) => {
@@ -345,7 +378,8 @@ export function weightedManhattanSimilarity(A: number[], B: number[], weights: n
         weightedDistance += weight * Math.abs(A[i] - B[i]);
         maxDistance += weight * Math.max(B[i], maxDistanceOption - B[i]);
     }
-    return 1 - weightedDistance / maxDistance;
+    const score = 1 - weightedDistance / maxDistance;
+    return score;
 }
 export const algorithmFuns: Record<string, (A: number[], B: number[], weights: number[]) => number> = {
     "cosine": weightedCosineSimilarity,
@@ -424,7 +458,7 @@ function ScoreAlgorithmSelect({ onChange, value }: any) {
         <Flex vertical gap={0}>
             <Space wrap>
                 <Select style={{ minWidth: 145 }}
-                     className='nodrag nopan'
+                    className='nodrag nopan'
                     value={value?.algorithm}
                     onChange={(v: string) => onChange({ ...value, algorithm: v })}
                     options={[
@@ -434,10 +468,10 @@ function ScoreAlgorithmSelect({ onChange, value }: any) {
                         { label: '曼哈顿相似度', value: 'manhattan' }
                     ]}
                 ></Select>
-                <Button  onClick={() => setWeightVisible(old => !old)} icon={<UnorderedListOutlined style={weightVisible && { color: '#91caff' } || {}} />}>
+                <Button onClick={() => setWeightVisible(old => !old)} icon={<UnorderedListOutlined style={weightVisible && { color: '#91caff' } || {}} />}>
                     权重
                 </Button>
-                <Button  onClick={() => setScalingFunctionVisible(old => !old)} icon={<LineChartOutlined style={scalingFunctionVisible && { color: '#91caff' } || {}} />}>
+                <Button onClick={() => setScalingFunctionVisible(old => !old)} icon={<LineChartOutlined style={scalingFunctionVisible && { color: '#91caff' } || {}} />}>
                     缩放函数
                 </Button>
             </Space>
@@ -587,15 +621,19 @@ function ScoreAlgorithmSelect({ onChange, value }: any) {
         </Flex>
     </>
 }
-function Score({ nodeId, scoreAlgorithm, poseScoreThreshold }: any) {
+function Score({ nodeId, scoreAlgorithm, poseScoreThreshold, interaction }: any) {
     const score = useRef<number | null>(null);
-    const setRuntimeNodeData = useRuntimeNodeStore((state) => (nodeData: any) => state.set(nodeId, nodeData));
+    const setRuntimeNodeData_ = useRuntimeNodeStore((state) => (nodeData: any) => state.set(nodeId, nodeData));
+    const setRuntimeNodeData = useCallback(setRuntimeNodeData_, [setRuntimeNodeData_]);
     useDeepCompareEffect(() => {
-        return useRuntimeNodeStore.subscribe(state => state.get(nodeId, "pose"), pose => {
+        return useRuntimeNodeStore.subscribe(state => ({
+            pose: state.get(nodeId, "pose"),
+            interactionObjectDatas: interaction && interaction.map((_: any, idx: number) => state.get(nodeId, `object${idx}`))
+        }), ({ pose, interactionObjectDatas }) => {
             if (pose?.keypoints && scoreAlgorithm?.algorithm && scoreAlgorithm?.weights) {
                 const keypoints: posedetection.Keypoint[] = pose.keypoints;
                 const algorithmFun = algorithmFuns[scoreAlgorithm.algorithm] || weightedCosineSimilarity;
-                const weights = scoreAlgorithm.weights;
+                const weights = scoreAlgorithm.weights.filter(({ type }: any) => type === 'jointAngle');
                 let A: number[] = [], B: number[] = [], weightsValue: number[] = [];
                 weights.forEach(({ angleCompose: [p1, p2, p3], angle, value: weight }: any) => {
                     const realtimeAngle = calculate3DAngle(keypoints[p1], keypoints[p2], keypoints[p3], poseScoreThreshold);
@@ -603,8 +641,18 @@ function Score({ nodeId, scoreAlgorithm, poseScoreThreshold }: any) {
                     B.push(angle);
                     weightsValue.push(weight);
                 });
+                const interactionWeights = scoreAlgorithm.weights.filter(({ type }: any) => type === 'interaction');
+                interactionWeights.forEach(({ joint, distance, value: weight }: any, idx: number) => {
+                    if (idx in interactionObjectDatas && interactionObjectDatas[idx]?.bbox) {
+                        const { bbox } = interactionObjectDatas[idx];
+                        const distance_ = keypoints[joint] ? calculateDistance(keypoints[joint], bbox) : Infinity;
+                        A.push(distance_);
+                        B.push(distance);
+                        weightsValue.push(weight);
+                    }
+                });
                 let score_ = algorithmFun(A, B, normalizeWeights(weightsValue));
-                const fn = scoreAlgorithm.scalingFunction.find(({ range: [min, max] }: any) => score_ >= min && score_ < max);
+                const fn = scoreAlgorithm.scalingFunction.find(({ range: [min, max] }: any) => score_ >= min && score_ < max || (score_ === 1.0 && max === 1.0));
                 if (fn) {
                     const { algorithm, a, b, c } = fn;
                     switch (algorithm) {
@@ -625,8 +673,8 @@ function Score({ nodeId, scoreAlgorithm, poseScoreThreshold }: any) {
                 score.current = Math.max(0, score_);
                 setRuntimeNodeData({ score: score_ });
             }
-        });
-    }, [scoreAlgorithm, poseScoreThreshold]);
+        }, { equalityFn: isEqual });
+    }, [scoreAlgorithm, poseScoreThreshold, interaction]);
     return score.current && score.current.toFixed(1);
 }
 
@@ -636,12 +684,13 @@ export function PoseValidator({ id, selected, data }: NodeProps<Node<any, 'pose-
     const detector = usePoseDetector();
     const [form] = Form.useForm();
     const updateNodeInternals = useUpdateNodeInternals();
+    console.log(data);
     return <ResizableNode id={id} data={data} selected={selected}>
-        {(width, height) => <>
+        {() => <>
             <UseHandle input={[{
                 id: "pose", label: <span>
                     姿态数据
-                    <Button  type="link" onClick={() => setConfigVisible(old => !old)}>
+                    <Button type="link" onClick={() => setConfigVisible(old => !old)}>
                         配置
                     </Button>
                 </span>
@@ -649,11 +698,11 @@ export function PoseValidator({ id, selected, data }: NodeProps<Node<any, 'pose-
                 id: "score", label: <span>
                     得分
                     <sup style={{ color: 'red' }}>
-                        <Score nodeId={id} scoreAlgorithm={data.scoreAlgorithm} poseScoreThreshold={data.poseScoreThreshold}></Score>
+                        <Score nodeId={id} interaction={data.interaction} scoreAlgorithm={data.scoreAlgorithm} poseScoreThreshold={data.poseScoreThreshold}></Score>
                     </sup>
                 </span>
             }]} />
-            {configVisible && detector && <Form  colon form={form}
+            {configVisible && detector && <Form colon form={form}
                 style={{
                     maxHeight: '500px', overflowY: 'auto'
                 }}
@@ -661,17 +710,19 @@ export function PoseValidator({ id, selected, data }: NodeProps<Node<any, 'pose-
                 onValuesChange={(changedValues, values) => {
                     Object.assign(data, values);
                     let poseJoints = changedValues?.poseJoints;
+                    let interaction = changedValues?.interaction;
                     if (changedValues?.poseCaptureThreshold || changedValues?.validatePoseImage) {
                         if (values?.validatePoseImage?.validatePose) {
                             poseJoints = genPoseJoints(values.validatePoseImage.validatePose, values.poseCaptureThreshold || data.poseCaptureThreshold);
                         }
                     }
-                    if (poseJoints) {
+                    if (poseJoints || interaction) {
                         Object.assign(data, {
-                            poseJoints,
+                            poseJoints: values.poseJoints,
+                            interaction: values.interaction,
                             scoreAlgorithm: {
                                 ...values?.scoreAlgorithm,
-                                weights: poseJoints?.map((joint: any) => {
+                                weights: [...((poseJoints || values.poseJoints || []).map((joint: any) => {
                                     if (values?.scoreAlgorithm?.weights) {
                                         const weight = values.scoreAlgorithm.weights.find(({ key }: any) => key === joint.value);
                                         if (weight) {
@@ -683,10 +734,19 @@ export function PoseValidator({ id, selected, data }: NodeProps<Node<any, 'pose-
                                         label: joint.label,
                                         angleCompose: joint.angleCompose,
                                         angle: joint.angle,
-                                        value: 0.01
+                                        value: 0.01,
+                                        type: 'jointAngle'
                                     };
 
-                                })
+                                })), ...((interaction || values.interaction || []).map(({ joint, distance }: any, idx: number) => {
+                                    if (values?.scoreAlgorithm?.weights) {
+                                        const weight = values.scoreAlgorithm.weights.find(({ key }: any) => key === `object${idx}`);
+                                        if (weight) {
+                                            return weight;
+                                        }
+                                    }
+                                    return { type: 'interaction', key: `interObject${idx}`, label: `对象${idx}`, joint, distance, value: 0.01 };
+                                }))]
                             }
                         });
                     }
@@ -696,7 +756,7 @@ export function PoseValidator({ id, selected, data }: NodeProps<Node<any, 'pose-
             >
                 <Form.Item label={<span>
                     上传姿势
-                    <Button  type="link" onClick={() => setPoseCaptureThresholdVisible(old => !old)}>
+                    <Button type="link" onClick={() => setPoseCaptureThresholdVisible(old => !old)}>
                         配置
                     </Button>
                 </span>} name="validatePoseImage" style={{ width: 230 }}>
@@ -711,6 +771,32 @@ export function PoseValidator({ id, selected, data }: NodeProps<Node<any, 'pose-
                 <Form.Item label="关节点置信阈值" name="poseScoreThreshold">
                     <Slider min={0} max={1} step={0.01} className="nodrag nopan" marks={{ 0.25: 0.25, 0.65: 0.65, 0.85: 0.85 }} />
                 </Form.Item>
+                <Form.List name={"interaction"}>
+                    {(fields, { add, remove }) => (<>
+                        {fields.map(({ key, name, ...restField }) => {
+                            return <Flex vertical key={`interaction${key}`} >
+                                <Space style={{ justifyContent: 'space-between' }}>
+                                    <UseHandle input={[{ id: `object${name}`, label: `对象${name + 1}` }]} />
+                                    <Space>
+                                        <span>距离</span>
+                                        <Form.Item style={{ minWidth: 130 }} label="关节" {...restField} name={[name, 'joint']}>
+                                            <Select showSearch optionFilterProp="label" className="nodrag nopan" options={poseJoint} />
+                                        </Form.Item>
+                                        <Form.Item style={{ minWidth: 130 }} {...restField} name={[name, 'distance']}>
+                                            <InputNumber suffix="px" />
+                                        </Form.Item>
+                                        <MinusCircleOutlined onClick={() => remove(name)} />
+                                    </Space>
+                                </Space>
+                            </Flex>;
+                        })}
+                        <Form.Item>
+                            <Button type="dashed" className="nopan" block icon={<PlusOutlined />} onClick={() => add({ joint: 20, distance: 0 })} >
+                                添加交互
+                            </Button>
+                        </Form.Item>
+                    </>)}
+                </Form.List>
                 <Form.Item label="得分" name="scoreAlgorithm">
                     <ScoreAlgorithmSelect />
                 </Form.Item>
@@ -718,3 +804,4 @@ export function PoseValidator({ id, selected, data }: NodeProps<Node<any, 'pose-
         </>}
     </ResizableNode>;
 }
+

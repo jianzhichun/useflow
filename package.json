@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@capacitor/core": "^6.1.2",
+    "@tensorflow-models/coco-ssd": "^2.2.3",
     "electron-log": "^5.1.7",
     "electron-updater": "^6.3.4"
   },

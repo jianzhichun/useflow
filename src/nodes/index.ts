@@ -12,6 +12,7 @@ import { HandPoseValidator } from './HandPoseValidator';
 import { DingTalkRobot } from './DingTalkRobot';
 import { JointOffset } from './JointOffset';
 import { FrameCrop } from './FrameCrop';
+import { ObjectDetection } from './ObjectDetection';
 
 export const nodeTypes = {
   'camera-input': Object.assign(CameraInput, {
@@ -37,6 +38,16 @@ export const nodeTypes = {
       return {
         label: '人像分割',
         modelType: "general"
+      }
+    }
+  }),
+  'object-detection': Object.assign(ObjectDetection, {
+    category: "流式输入输出",
+    defaultData() {
+      return {
+        label: '对象识别',
+        confidenceThreshold: 0.5,
+        tracking: true
       }
     }
   }),

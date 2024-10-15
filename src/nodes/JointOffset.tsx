@@ -5,11 +5,12 @@ import { Button, Flex, Form, InputNumber, Select, Space } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { poseJoint } from './VideoRender';
 import UseHandle from '../components/UseHandle';
-import { useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { useDeepCompareEffect } from 'ahooks';
 import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
 import * as posedetection from '@tensorflow-models/pose-detection';
 import { normalizeWeights, weightedManhattanSimilarity } from './PoseValidator';
+import { isEqual } from 'lodash';
 
 function Offset({ idx, restField, remove }: any) {
     return <>
@@ -39,7 +40,8 @@ function Offset({ idx, restField, remove }: any) {
 
 function Score({ nodeId, offsets }: any) {
     const score = useRef<number | null>(null);
-    const setRuntimeNodeData = useRuntimeNodeStore((state) => (nodeData: any) => state.set(nodeId, nodeData));
+    const setRuntimeNodeData_ = useRuntimeNodeStore((state) => (nodeData: any) => state.set(nodeId, nodeData));
+    const setRuntimeNodeData = useCallback(setRuntimeNodeData_, [setRuntimeNodeData_]);
     useDeepCompareEffect(() => {
         return useRuntimeNodeStore.subscribe(state => state.get(nodeId, "pose"), pose => {
             if (pose?.keypoints && pose?.shape && offsets) {
@@ -72,7 +74,7 @@ function Score({ nodeId, offsets }: any) {
                 score.current = Math.max(0, score_);
                 setRuntimeNodeData({ score: score_ });
             }
-        });
+        }, { equalityFn: isEqual });
     }, [offsets]);
     return score.current && score.current.toFixed(1);
 }
@@ -94,7 +96,6 @@ export function JointOffset({ id, selected, data }: NodeProps<Node<any, 'joint-o
                 </span>
             }]} />
             <Form
-                style={{ width }}
                 initialValues={data}
                 autoComplete="off"
                 onValuesChange={(changedValues, values) => {
