@@ -12,7 +12,7 @@ export function Log({ id, selected, data }: NodeProps<Node<any, "log">>) {
         } else if (typeof log === "object") {
             return <Markdown>{JSON.stringify(log, null, 2)}</Markdown>;
         } else {
-            return <>未知类型</>;
+            return log;
         }
     }
     return (

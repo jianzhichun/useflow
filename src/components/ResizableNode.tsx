@@ -6,6 +6,7 @@ import { CloseOutlined } from '@ant-design/icons';
 
 interface ResizableNodeProps {
     id: string;
+    title?: any;
     selected?: boolean;
     minWidth?: number;
     minHeight?: number;
@@ -13,7 +14,7 @@ interface ResizableNodeProps {
     children: (width: number, height: number) => JSX.Element;
 }
 
-export default function ({ id, selected, minWidth = 200, minHeight = 100, data, children }: ResizableNodeProps) {
+export default function ({ id, selected, minWidth = 200, minHeight = 100, data, title, children }: ResizableNodeProps) {
     const [width, setWidth] = useState(minWidth);
     const [height, setHeight] = useState(minHeight);
     const { setNodes } = useReactFlow();
@@ -30,7 +31,7 @@ export default function ({ id, selected, minWidth = 200, minHeight = 100, data, 
             setNodes((nodes) => nodes.filter((node) => node.id !== id));
         }} icon={<CloseOutlined />} />}
         <NodeResizer minWidth={minWidth} minHeight={minHeight} isVisible={selected || false} onResizeEnd={(_, { width, height }: ResizeParams) => { setWidth(width); setHeight(height); }} />
-        <EditableTitle title={data.label} onChange={(title) => { Object.assign(data, { label: title }) }}></EditableTitle>
+        <EditableTitle title={title || data.label} onChange={(title) => { Object.assign(data, { label: title }) }}></EditableTitle>
         {children(width, height)}
     </div>;
 }

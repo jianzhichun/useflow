@@ -1,0 +1,11 @@
+http_server:
+  port: 1234
+
+logging:
+  # level: debug
+  use_color: true
+
+# If you are crossing broadcast domains (VLANs) then
+# you need to specify all IPs as unicast targets
+discovery_ips:
+  - 192.168.31.168

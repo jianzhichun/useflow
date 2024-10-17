@@ -17,7 +17,8 @@
     "@capacitor/core": "^6.1.2",
     "@tensorflow-models/coco-ssd": "^2.2.3",
     "electron-log": "^5.1.7",
-    "electron-updater": "^6.3.4"
+    "electron-updater": "^6.3.4",
+    "exif-js": "^2.3.0"
   },
   "license": "AGPL-3.0-only",
   "devDependencies": {

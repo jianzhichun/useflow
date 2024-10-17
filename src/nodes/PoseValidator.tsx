@@ -643,9 +643,12 @@ function Score({ nodeId, scoreAlgorithm, poseScoreThreshold, interaction }: any)
                 });
                 const interactionWeights = scoreAlgorithm.weights.filter(({ type }: any) => type === 'interaction');
                 interactionWeights.forEach(({ joint, distance, value: weight }: any, idx: number) => {
-                    if (idx in interactionObjectDatas && interactionObjectDatas[idx]?.bbox) {
-                        const { bbox } = interactionObjectDatas[idx];
-                        const distance_ = keypoints[joint] ? calculateDistance(keypoints[joint], bbox) : Infinity;
+                    if (idx in interactionObjectDatas) {
+                        let distance_ = 180;
+                        if (interactionObjectDatas[idx]?.bbox && keypoints[joint]) {
+                            const { bbox } = interactionObjectDatas[idx];
+                            distance_ = calculateDistance(keypoints[joint], bbox);
+                        }
                         A.push(distance_);
                         B.push(distance);
                         weightsValue.push(weight);
@@ -684,7 +687,6 @@ export function PoseValidator({ id, selected, data }: NodeProps<Node<any, 'pose-
     const detector = usePoseDetector();
     const [form] = Form.useForm();
     const updateNodeInternals = useUpdateNodeInternals();
-    console.log(data);
     return <ResizableNode id={id} data={data} selected={selected}>
         {() => <>
             <UseHandle input={[{

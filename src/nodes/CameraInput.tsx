@@ -8,6 +8,7 @@ import { useTfjs } from '../components/Tfjs';
 import ResizableNode from '../components/ResizableNode';
 import { useForm } from 'antd/es/form/Form';
 import { requestCameraPermission } from '../components/Utils';
+import EXIF from 'exif-js';
 
 export function CameraInput({ id, selected, data }: NodeProps<Node<any, 'camera-input'>>) {
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
@@ -28,49 +29,34 @@ export function CameraInput({ id, selected, data }: NodeProps<Node<any, 'camera-
   useEffect(() => {
     if (!tf) return;
     if (data?.isUsingVideoSrc && data?.videoSrc) {
-      const fetchVideoStream = async () => {
-        const response = await fetch(data?.videoSrc);
-        const reader = response.body!.getReader();
-        const decoder = new TextDecoder('utf-8');
-        let buffer = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          let boundaryIndex;
-
-          while ((boundaryIndex = buffer.indexOf('a very good boundary line')) !== -1) {
-            const part = buffer.slice(0, boundaryIndex);
-            buffer = buffer.slice(boundaryIndex + 'a very good boundary line'.length);
-
-            // 假设 JPEG 数据以 "\r\n\r\n" 结束
-            const jpegDataStartIndex = part.indexOf('\r\n\r\n') + 4; // JPEG 数据前的头部
-            const jpegData = part.slice(jpegDataStartIndex);
-
-            // 将 JPEG 数据转换为 Tensor
-            const blob = new Blob([new Uint8Array(jpegData as any)], { type: 'image/jpeg' });
-            const img = new Image();
-            const url = URL.createObjectURL(blob);
-            img.src = url;
-
-            img.onload = async () => {
-              const tensor = tf.browser.fromPixels(img);
-              debugger
-              if (data?.isMirrored) {
-                const mirroredTensor = tf.reverse(tensor, [1]);
-                setRuntimeNodeData({ tensor: mirroredTensor });
-                tensor.dispose();
-              } else {
-                setRuntimeNodeData({ tensor });
-              }
-              URL.revokeObjectURL(url); // 释放 URL 对象
-            };
+      const imageElement = new Image();
+      let frid: number;
+      function fetchAndProcessStream(url: string) {
+        imageElement.crossOrigin = 'anonymous';
+        imageElement.src = url;
+        async function processStream() {
+          if (tf) {
+            const tensor = await tf.browser.fromPixelsAsync(imageElement, 4);
+            if (data?.isMirrored) {
+              const mirroredTensor = tf.reverse(tensor, [1]);
+              setRuntimeNodeData({ tensor: mirroredTensor });
+              tensor.dispose();
+            } else {
+              setRuntimeNodeData({ tensor });
+            }
+            frid = requestAnimationFrame(processStream);
           }
         }
+        imageElement.onload = processStream;
+      }
+      fetchAndProcessStream(data.videoSrc);
+      return () => {
+        cancelAnimationFrame(frid);
+        if (imageElement) {
+          imageElement.src = '';
+          imageElement.onload = null;
+        }
       };
-      fetchVideoStream();
     } else if (data?.selectedDeviceId) {
       const videoElement = document.createElement('video');
       let frid: number;

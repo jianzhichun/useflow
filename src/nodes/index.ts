@@ -13,6 +13,7 @@ import { DingTalkRobot } from './DingTalkRobot';
 import { JointOffset } from './JointOffset';
 import { FrameCrop } from './FrameCrop';
 import { ObjectDetection } from './ObjectDetection';
+import { ScriptConvert } from './ScriptConvert';
 
 export const nodeTypes = {
   'camera-input': Object.assign(CameraInput, {
@@ -163,6 +164,14 @@ export const nodeTypes = {
     defaultData() {
       return {
         label: '日志',
+      }
+    }
+  }),
+  'script-convert': Object.assign(ScriptConvert, {
+    category: "流式输入输出",
+    defaultData() {
+      return {
+        label: '转换脚本',
       }
     }
   })

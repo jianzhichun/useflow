@@ -125,7 +125,13 @@ function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any) {
     );
     useDeepCompareEffect(() => {
         const targetColors: any = {};
-        return useRuntimeNodeStore.subscribe(state => state.get(nodeId, `param${idx}`), param => {
+        return useRuntimeNodeStore.subscribe(state => {
+            const param = state.get(nodeId, `param${idx}`);
+            if (obj?.type === "objects") {
+                return {param, additionText: state.get(nodeId, `additionText${idx}`)};
+            }
+            return {param};
+        }, ({param, additionText}) => {
             if (param) {
                 const ctx = canvas.getContext("2d");
                 if (ctx) {
@@ -157,11 +163,11 @@ function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any) {
                             }
                             break;
                         case "objects":
-                            const predictions = param as any[];
+                            const predictions = Array.isArray(param) ? param as any[] : [param];
                             predictions.forEach(prediction => {
                                 const { target, age, hits } = prediction;
                                 const [x, y, width, height] = prediction.bbox;
-                                const text = `${prediction.class}: ${(prediction.score * 100).toFixed(2)}%`;
+                                const text = `${prediction.class}: ${(prediction.score * 100).toFixed(2)}% ${additionText}`;
                                 let color;
                                 if (target in targetColors) {
                                     color = targetColors[target];
@@ -169,12 +175,16 @@ function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any) {
                                     color = getRandomColor();
                                     targetColors[target] = color;
                                 }
-                                ctx.strokeStyle = color;
-                                ctx.lineWidth = 2;
-                                ctx.strokeRect(x, y, width, height);
-                                ctx.fillStyle = color;
-                                ctx.font = '18px Arial';
-                                ctx.fillText(text, x, y > 10 ? y - 5 : 10);
+                                if (obj.drawBox) {
+                                    ctx.strokeStyle = color;
+                                    ctx.lineWidth = 2;
+                                    ctx.strokeRect(x, y, width, height);
+                                }
+                                if (obj.drawLabel) {
+                                    ctx.fillStyle = color;
+                                    ctx.font = '18px Arial';
+                                    ctx.fillText(text, x, y > 10 ? y - 5 : 10);
+                                }
                             });
                             break;
                         case "scoreInfoFrame":
@@ -197,7 +207,7 @@ function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any) {
                 }
             }
         }, { equalityFn: isEqual });
-    }, [obj]);
+    }, [obj, idx]);
     return <Flex vertical>
         <Space align='baseline'>
             <UseHandle input={[{
@@ -250,6 +260,7 @@ function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any) {
                             <Form.Item {...restField} className="nodrag nopan" name={[idx, "drawLabel"]} label="绘制标识">
                                 <Switch />
                             </Form.Item>
+                            <UseHandle input={[{ id: `additionText${idx}`, label: '附加文本' }]} />
                         </>;
                     case "scoreInfoFrame":
                         return <>
@@ -357,7 +368,9 @@ export function VideoRender({ id, selected, data }: NodeProps<Node<any, 'video-r
                                     drawRemainTime: true,
                                     drawPosition: "rt",
                                     drawFontColor: "#ffffff",
-                                    drawFontSize: 20
+                                    drawFontSize: 20,
+                                    drawLabel: true,
+                                    drawBox: true
                                 })} >
                                     添加一项
                                 </Button>

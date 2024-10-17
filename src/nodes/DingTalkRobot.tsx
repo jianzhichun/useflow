@@ -83,6 +83,27 @@ function Msg({ obj, secret, webhook, nodeId, idx, restField, remove }: any) {
                             const finalMsg = replacePlaceholders(template, [{ field: "得分", replaceText: msg }]);
                             throttledSendMsg.run(finalMsg, secret, webhook)
                         }
+                        break;
+                    case "scoreInfoFrame":
+                        if (filterCondition(condition, {
+                            "得分": msg.score,
+                            "名称": msg.name,
+                            "状态": msg.state,
+                            "倒计时": msg.remainTime,
+                            "完成次数": msg.successCount,
+                            "保持时间": msg.elapsedTime
+                        })) {
+                            const finalMsg = replacePlaceholders(template, [
+                                { field: "得分", replaceText: msg.score },
+                                { field: "名称", replaceText: msg.name },
+                                { field: "状态", replaceText: msg.state },
+                                { field: "倒计时", replaceText: msg.remainTime },
+                                { field: "完成次数", replaceText: msg.successCount },
+                                { field: "保持时间", replaceText: msg.elapsedTime }
+                            ]);
+                            throttledSendMsg.run(finalMsg, secret, webhook)
+                        }
+                        break;
                 }
             }
         }, { equalityFn: isEqual });
@@ -139,11 +160,19 @@ function Msg({ obj, secret, webhook, nodeId, idx, restField, remove }: any) {
                                     {
                                         name: "倒计时",
                                         type: "number",
+                                    },
+                                    {
+                                        name: "完成次数",
+                                        type: "number",
+                                    },
+                                    {
+                                        name: "保持时间",
+                                        type: "number",
                                     }
                                 ]} />
                             </Form.Item>
                             <Form.Item {...restField} className="nodrag nopan" name={[idx, "template"]} label="消息模板">
-                                <TagInput placeholders={["名称", "状态", "得分", "倒计时"]}></TagInput>
+                                <TagInput placeholders={["名称", "状态", "得分", "倒计时", "完成次数", "保持时间"]}></TagInput>
                             </Form.Item>
                         </>;
                 }

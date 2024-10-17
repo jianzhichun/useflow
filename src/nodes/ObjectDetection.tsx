@@ -2,7 +2,7 @@ import { NodeProps, useUpdateNodeInternals } from '@xyflow/react';
 import { useCallback, useEffect } from 'react';
 import UseHandle from '../components/UseHandle';
 import { useRuntimeNodeStore } from '../components/UseRuntimeNodeStore';
-import { isEqual, set } from 'lodash';
+import { isEqual } from 'lodash';
 import ResizableNode from '../components/ResizableNode';
 import { Button, Flex, Form, Select, Space, Switch } from 'antd';
 import { useForm } from 'antd/es/form/Form';

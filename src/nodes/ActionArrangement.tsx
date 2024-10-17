@@ -4,7 +4,7 @@ import UseHandle from "../components/UseHandle";
 import { useForm } from "antd/es/form/Form";
 import { Button, Flex, Form, Input, InputNumber, Select, Space } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { isEqual } from "lodash";
 import "./ActionArrangement.css"
 import ResizableNode from "../components/ResizableNode";
@@ -29,14 +29,15 @@ export function PoseFrame({ nodeId, idx, restField, remove, frames }: any) {
             </>
         }]} />
         {configVisible && <>
-            <Form.Item {...restField} className="nodrag nopan" name={[idx, "wait"]} label={<>
+            {frames?.[idx]?.waitStrategy !== 'wait_next' && <Form.Item {...restField} className="nodrag nopan" name={[idx, "wait"]} label={<>
                 等待时间
                 {idx === frame?.currFrame && frame?.remainTime && <span style={{ color: 'red' }}>&nbsp;{frame.remainTime.toFixed(0)}</span>}
             </>}>
                 <InputNumber suffix="秒" />
-            </Form.Item>
+            </Form.Item>}
             <Form.Item {...restField} className="nodrag nopan" name={[idx, "waitStrategy"]} label="等待策略">
                 <Select options={[
+                    { value: "until_next", label: "直到判断" },
                     { value: "wait_next", label: "等待判断" },
                     { value: "condition_next", label: "条件判断" }
                 ]} />
@@ -86,6 +87,8 @@ export function ActionArrangement({ id, selected, data }: NodeProps<Node<any, 'a
     const updateNodeInternals = useUpdateNodeInternals();
     const setRuntimeNodeData_ = useRuntimeNodeStore((state) => (nodeData: any) => state.set(id, nodeData));
     const setRuntimeNodeData = useCallback(setRuntimeNodeData_, [setRuntimeNodeData_]);
+    const lastSuccessStatus = useRef({ lastSuccessFrame: 0, time: 0 });
+    const successCount = useRef(0);
     useEffect(() => {
         if (!form) {
             return;
@@ -96,21 +99,38 @@ export function ActionArrangement({ id, selected, data }: NodeProps<Node<any, 'a
             const { frames } = form.getFieldsValue();
             if (frames.length > 0) {
                 if (checkFrame >= frames.length) {
+                    successCount.current++;
                     checkFrame = 0;
                 }
                 const currFrame = checkFrame;
                 const { name, wait, waitStrategy, minScore, rollback, scoreFormat } = frames[checkFrame];
                 const currentTime = Date.now();
                 const elapsedTime = (currentTime - checkStartTime) / 1000;
-                const currScore = params?.[`score${checkFrame}`];
+                const currScore = params?.[`score${checkFrame}`] || 0;
                 let state = '校验';
                 if (currScore) {
                     switch (waitStrategy) {
-                        case "wait_next":
+                        case "until_next":
                             if (elapsedTime >= wait) {
                                 if (currScore >= minScore) {
                                     checkFrame++;
                                     state = '成功';
+                                    lastSuccessStatus.current = { lastSuccessFrame: currFrame, time: currentTime };
+                                } else {
+                                    checkFrame = rollback;
+                                    state = '失败';
+                                }
+                                checkStartTime = Date.now();
+                            }
+                            break;
+                        case "wait_next":
+                            if (currScore >= minScore) {
+                                state = '等待中';
+                                lastSuccessStatus.current = { lastSuccessFrame: currFrame, time: currentTime };
+                            } else {
+                                if (lastSuccessStatus.current.lastSuccessFrame === currFrame) {
+                                    checkFrame++;
+                                    state = '等待结束';
                                 } else {
                                     checkFrame = rollback;
                                     state = '失败';
@@ -123,13 +143,13 @@ export function ActionArrangement({ id, selected, data }: NodeProps<Node<any, 'a
                             if (currScore >= minScore) {
                                 checkFrame++;
                                 state = '成功';
-                                checkStartTime = Date.now();
+                                lastSuccessStatus.current = { lastSuccessFrame: name, time: currentTime };
                             }
                             if (elapsedTime >= wait) {
                                 checkFrame = rollback;
                                 state = '失败';
-                                checkStartTime = Date.now();
                             }
+                            checkStartTime = Date.now();
                             break;
                     }
                 }
@@ -142,15 +162,18 @@ export function ActionArrangement({ id, selected, data }: NodeProps<Node<any, 'a
                         formatScore: currScore && formatScore(scoreFormat, Math.max(0, currScore)),
                         elapsedTime,
                         currentTime,
-                        remainTime: Math.max(wait - elapsedTime, 0),
-                        currFrame
+                        remainTime: Math.max((wait || 0) - elapsedTime, 0),
+                        currFrame,
+                        lastSuccessFrameName: lastSuccessStatus.current?.lastSuccessFrame,
+                        lastSuccessTime: lastSuccessStatus.current?.time,
+                        successCount: successCount.current
                     }
                 });
             }
         }, { equalityFn: isEqual });
     }, [form]);
     return (
-        <ResizableNode id={id} data={data} selected={selected}>
+        <ResizableNode title={`${data.label} 第${successCount.current}次`} id={id} data={data} selected={selected}>
             {() => <>
                 <UseHandle output={[{ id: 'frame', label: '信息帧' }]} />
                 <Form
