@@ -11,6 +11,7 @@ import TagInput from '../components/TagInput';
 import Filter from '../components/FilterInput';
 import { isEqual } from 'lodash';
 import { useThrottleFn } from 'ahooks';
+import _ from 'lodash';
 
 async function getHmacSignature(timestamp: any, secret: string) {
     const encoder = new TextEncoder();
@@ -74,7 +75,10 @@ function Msg({ obj, secret, webhook, nodeId, idx, restField, remove }: any) {
     const [configVisible, setConfigVisible] = useState(false);
     const throttledSendMsg = useThrottleFn(sendMsg, { wait: 5000 });
     useEffect(() => {
+        let oldMsg: any = null;
         return useRuntimeNodeStore.subscribe(state => state.get(nodeId, `msg${idx}`), msg => {
+            if (_.isEqual(oldMsg, msg)) return;
+            oldMsg = msg;
             if (obj?.type && obj?.condition && obj?.template && secret && webhook) {
                 const { type, condition, template } = obj;
                 switch (type) {
