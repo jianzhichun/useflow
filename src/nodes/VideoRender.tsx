@@ -167,7 +167,7 @@ function DrawAction({ obj, canvas, nodeId, idx, restField, remove }: any) {
                             predictions.forEach(prediction => {
                                 const { target, age, hits } = prediction;
                                 const [x, y, width, height] = prediction.bbox;
-                                const text = `${prediction.class}: ${(prediction.score * 100).toFixed(2)}% ${additionText}`;
+                                const text = `${prediction.class}${target}: ${(prediction.score * 100).toFixed(2)}% ${additionText || ''}`;
                                 let color;
                                 if (target in targetColors) {
                                     color = targetColors[target];

@@ -478,7 +478,7 @@ function ScoreAlgorithmSelect({ onChange, value }: any) {
             {
                 weightVisible && value.weights && <>
                     {value.weights.map((weight: any) => {
-                        return <Form.Item key={weight.key} label={weight.label}>
+                        return <Form.Item key={weight.key} label={weight?.label}>
                             <Slider className='nodrag nopan' value={weight.value} onChange={(v) => {
                                 onChange({
                                     ...value, weights: value.weights.map((item: any) => {
@@ -649,6 +649,7 @@ function Score({ nodeId, scoreAlgorithm, poseScoreThreshold, interaction }: any)
                             const { bbox } = interactionObjectDatas[idx];
                             distance_ = calculateDistance(keypoints[joint], bbox);
                         }
+                        console.log(distance_)
                         A.push(distance_);
                         B.push(distance);
                         weightsValue.push(weight);
@@ -724,7 +725,7 @@ export function PoseValidator({ id, selected, data }: NodeProps<Node<any, 'pose-
                             interaction: values.interaction,
                             scoreAlgorithm: {
                                 ...values?.scoreAlgorithm,
-                                weights: [...((poseJoints || values.poseJoints || []).map((joint: any) => {
+                                weights: [...((values.poseJoints || []).map((joint: any) => {
                                     if (values?.scoreAlgorithm?.weights) {
                                         const weight = values.scoreAlgorithm.weights.find(({ key }: any) => key === joint.value);
                                         if (weight) {
@@ -740,9 +741,9 @@ export function PoseValidator({ id, selected, data }: NodeProps<Node<any, 'pose-
                                         type: 'jointAngle'
                                     };
 
-                                })), ...((interaction || values.interaction || []).map(({ joint, distance }: any, idx: number) => {
+                                })), ...((values.interaction || []).map(({ joint, distance }: any, idx: number) => {
                                     if (values?.scoreAlgorithm?.weights) {
-                                        const weight = values.scoreAlgorithm.weights.find(({ key }: any) => key === `object${idx}`);
+                                        const weight = values.scoreAlgorithm.weights.find(({ key }: any) => key === `interObject${idx}`);
                                         if (weight) {
                                             return weight;
                                         }

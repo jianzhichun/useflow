@@ -1,6 +1,6 @@
 {
   "name": "useflow",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "type": "module",
   "copyright": "金华岩石信息科技有限公司",
   "scripts": {
@@ -17,7 +17,9 @@
     "@capacitor/core": "^6.1.2",
     "@tensorflow-models/coco-ssd": "^2.2.3",
     "electron-log": "^5.1.7",
-    "electron-updater": "^6.3.4"
+    "electron-updater": "^6.3.4",
+    "hls.js": "^1.5.17",
+    "kalmanjs": "^1.1.0"
   },
   "license": "AGPL-3.0-only",
   "devDependencies": {

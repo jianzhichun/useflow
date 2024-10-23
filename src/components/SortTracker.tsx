@@ -11,7 +11,7 @@ export interface Track extends Detection {
     target: number;
     age: number;
     hits: number;
-    velocity: [number, number]; // 增加速度矢量，用于预测位置
+    velocity: [number, number]; // 速度矢量，用于预测位置
 }
 
 interface AssociationResult {
@@ -23,40 +23,41 @@ interface AssociationResult {
 class SortTracker {
     private tracks: Track[] = [];
     private classCounters: { [key: string]: number } = {}; // 每种类别的编号计数器
-    private maxAge: number = 5;
-    private minHits: number = 1;
-    private iouThreshold: number = 0.3;
+    private availableTargets: number[] = []; // 空闲的 target 池
+    private maxAge: number = 5; // 最大轨迹生命周期
+    private minHits: number = 3; // 最小匹配次数
+    private iouThreshold: number = 0.3; // IoU 阈值
 
     public update(detections: Detection[]): Track[] {
-        // 更新现有轨迹的年龄并计算速度
+        // 更新现有轨迹的年龄
         this.tracks.forEach(track => {
             const prevBBox = track.bbox;
             track.age++;
-            const detection = detections.find(det => det.class === track.class && this.iou(det.bbox, prevBBox) > 0);
+            const detection = detections.find(det => det.class === track.class && this.iou(det.bbox, prevBBox) > this.iouThreshold);
+            
             if (detection) {
+                // 更新速度向量
                 const [x1, y1] = prevBBox;
                 const [x2, y2] = detection.bbox;
                 track.velocity = [x2 - x1, y2 - y1];
+                // 更新轨迹
+                track.bbox = detection.bbox;
+                track.age = 0; // 重置轨迹年龄
+                track.hits++;
+            } else {
+                track.hits /= 2;
             }
         });
 
         // 关联检测结果与轨迹
         const matches = this.associateDetectionsToTracks(detections, this.tracks);
 
-        // 更新已匹配的轨迹
-        matches.matched.forEach(([detIdx, trackIdx]) => {
-            const detection = detections[detIdx];
-            this.tracks[trackIdx].bbox = detection.bbox;
-            this.tracks[trackIdx].class = detection.class;
-            this.tracks[trackIdx].score = detection.score;
-            this.tracks[trackIdx].age = 0;
-            this.tracks[trackIdx].hits++;
-        });
-
-        // 为未匹配的新检测创建新轨迹，并分配类别特定编号
+        // 为未匹配的新检测创建新轨迹
         matches.unmatchedDetections.forEach(detIdx => {
             const detection = detections[detIdx];
-            const target = this.getNextClassId(detection.class); // 获取类别特定编号
+
+            // 创建新轨迹，优先复用空闲的 target ID
+            const target = this.getNextTargetId(detection.class);
             this.tracks.push({
                 target,
                 ...detection,
@@ -66,12 +67,34 @@ class SortTracker {
             });
         });
 
-        // 移除未匹配且达到最大丢失帧数的轨迹
-        this.tracks = this.tracks.filter(track => track.age < this.maxAge && track.hits >= this.minHits);
+        // 移除未匹配且达到最大丢失帧数的轨迹，并回收 target ID
+        this.tracks = this.tracks.filter(track => {
+            if (track.age >= this.maxAge && track.hits < this.minHits) {
+                // 将删除的轨迹的 target ID 回收到空闲池中
+                this.availableTargets.push(track.target);
+                return false;
+            }
+            return true;
+        });
 
+        // 返回当前的轨迹
         return this.tracks.map(track => _.omit(track, []));
     }
 
+    // 从空闲池获取 target ID，如果没有可用 ID 则递增
+    private getNextTargetId(className: string): number {
+        if (this.availableTargets.length > 0) {
+            return this.availableTargets.shift()!; // 从空闲池中取出一个 ID
+        }
+
+        // 如果没有空闲 ID，递增编号
+        if (!this.classCounters[className]) {
+            this.classCounters[className] = 1; // 初始化类别编号
+        }
+        return this.classCounters[className]++;
+    }
+
+    // 计算两个检测框的IoU
     private iou(bbox1: [number, number, number, number], bbox2: [number, number, number, number]): number {
         const [x1, y1, w1, h1] = bbox1;
         const [x2, y2, w2, h2] = bbox2;
@@ -89,6 +112,7 @@ class SortTracker {
         return interArea / unionArea;
     }
 
+    // 匹配检测结果与轨迹
     private associateDetectionsToTracks(detections: Detection[], tracks: Track[]): AssociationResult {
         const matched: Array<[number, number]> = [];
         const unmatchedDetections: number[] = [];
@@ -100,7 +124,7 @@ class SortTracker {
 
             tracks.forEach((track, trackIdx) => {
                 if (track.class === det.class && unmatchedTracks.has(trackIdx)) {
-                    const iouScore = this.iou(det.bbox, this.estimateNextPosition(track));
+                    const iouScore = this.iou(det.bbox, track.bbox);
                     if (iouScore > highestIou) {
                         bestMatch = trackIdx;
                         highestIou = iouScore;
@@ -117,21 +141,6 @@ class SortTracker {
         });
 
         return { matched, unmatchedDetections, unmatchedTracks: Array.from(unmatchedTracks) };
-    }
-
-    private estimateNextPosition(track: Track): [number, number, number, number] {
-        const [x, y, w, h] = track.bbox;
-        const [vx, vy] = track.velocity;
-        return [x + vx, y + vy, w, h];
-    }
-
-    private getNextClassId(className: string): number {
-        // 如果该类别不存在计数器，则初始化为 1
-        if (!this.classCounters[className]) {
-            this.classCounters[className] = 1;
-        }
-        // 返回当前类别的编号并递增计数器
-        return this.classCounters[className]++;
     }
 }
 

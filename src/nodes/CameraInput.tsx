@@ -8,7 +8,7 @@ import { useTfjs } from '../components/Tfjs';
 import ResizableNode from '../components/ResizableNode';
 import { useForm } from 'antd/es/form/Form';
 import { requestCameraPermission } from '../components/Utils';
-import EXIF from 'exif-js';
+import Hls from 'hls.js';
 
 export function CameraInput({ id, selected, data }: NodeProps<Node<any, 'camera-input'>>) {
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
@@ -29,34 +29,72 @@ export function CameraInput({ id, selected, data }: NodeProps<Node<any, 'camera-
   useEffect(() => {
     if (!tf) return;
     if (data?.isUsingVideoSrc && data?.videoSrc) {
-      const imageElement = new Image();
-      let frid: number;
-      function fetchAndProcessStream(url: string) {
-        imageElement.crossOrigin = 'anonymous';
-        imageElement.src = url;
-        async function processStream() {
-          if (tf) {
-            const tensor = await tf.browser.fromPixelsAsync(imageElement, 4);
-            if (data?.isMirrored) {
-              const mirroredTensor = tf.reverse(tensor, [1]);
-              setRuntimeNodeData({ tensor: mirroredTensor });
-              tensor.dispose();
-            } else {
-              setRuntimeNodeData({ tensor });
+      if (data?.videoSrc.includes('open.ys7.com')) {
+        const videoElement = document.createElement('video');
+        videoElement.autoplay = true;
+        videoElement.muted = true;
+        videoElement.width = 640;
+        videoElement.height = 480;
+        let frid: number;
+        videoElement.addEventListener('loadeddata', () => {
+          async function processStream() {
+            if (tf) {
+              const tensor = await tf.browser.fromPixelsAsync(videoElement);
+              if (data?.isMirrored) {
+                const mirroredTensor = tf.reverse(tensor, [1]);
+                setRuntimeNodeData({ tensor: mirroredTensor });
+                tensor.dispose();
+              } else {
+                setRuntimeNodeData({ tensor });
+              }
+              frid = requestAnimationFrame(processStream);
             }
-            frid = requestAnimationFrame(processStream);
           }
+          processStream();
+        });
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(data.videoSrc);
+          hls.attachMedia(videoElement);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            videoElement.play();
+          });
+          return () => {
+            cancelAnimationFrame(frid);
+            hls.destroy();
+            videoElement.remove();
+          };
         }
-        imageElement.onload = processStream;
+      } else {
+        const imageElement = new Image();
+        let frid: number;
+        function fetchAndProcessStream(url: string) {
+          imageElement.crossOrigin = 'anonymous';
+          imageElement.src = url;
+          async function processStream() {
+            if (tf) {
+              const tensor = await tf.browser.fromPixelsAsync(imageElement, 4);
+              if (data?.isMirrored) {
+                const mirroredTensor = tf.reverse(tensor, [1]);
+                setRuntimeNodeData({ tensor: mirroredTensor });
+                tensor.dispose();
+              } else {
+                setRuntimeNodeData({ tensor });
+              }
+              frid = requestAnimationFrame(processStream);
+            }
+          }
+          imageElement.onload = processStream;
+        }
+        fetchAndProcessStream(data.videoSrc);
+        return () => {
+          cancelAnimationFrame(frid);
+          if (imageElement) {
+            imageElement.src = '';
+            imageElement.onload = null;
+          }
+        };
       }
-      fetchAndProcessStream(data.videoSrc);
-      return () => {
-        cancelAnimationFrame(frid);
-        if (imageElement) {
-          imageElement.src = '';
-          imageElement.onload = null;
-        }
-      };
     } else if (data?.selectedDeviceId) {
       const videoElement = document.createElement('video');
       let frid: number;
@@ -113,7 +151,7 @@ export function CameraInput({ id, selected, data }: NodeProps<Node<any, 'camera-
 
   return (
     <ResizableNode id={id} data={data} selected={selected}>
-      {(width) => <>
+      {() => <>
         <UseHandle output={[{ id: "tensor", label: "视频流" }]}></UseHandle>
         <Form colon form={form}
           initialValues={data}
