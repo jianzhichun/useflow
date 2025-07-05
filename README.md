@@ -1,7 +1,8 @@
 # UseFlow - 视觉化AI流程编排平台
 
 <div align="center">
-    <img src="public/logo.png" alt="UseFlow Logo" width="100"/>
+  <img src="public/logo.png" alt="UseFlow Logo" width="100"/>
+  
   [![License](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
   [![TypeScript](https://img.shields.io/badge/TypeScript-4.5+-blue.svg)](https://www.typescriptlang.org/)
   [![React](https://img.shields.io/badge/React-18.2+-blue.svg)](https://reactjs.org/)
