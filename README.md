@@ -1,6 +1,7 @@
 # UseFlow - 视觉化AI流程编排平台
 
 <div align="center">
+    <img src="public/logo.png" alt="UseFlow Logo" width="100"/>
   [![License](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
   [![TypeScript](https://img.shields.io/badge/TypeScript-4.5+-blue.svg)](https://www.typescriptlang.org/)
   [![React](https://img.shields.io/badge/React-18.2+-blue.svg)](https://reactjs.org/)
@@ -100,43 +101,6 @@ npm run android:build
 
 ## 🛠️ 技术架构
 
-### 系统架构图
-
-```mermaid
-graph TB
-    subgraph "前端层"
-        A[React 18 + TypeScript] --> B[Ant Design UI]
-        A --> C[React Flow 节点编辑器]
-        A --> D[Zustand 状态管理]
-    end
-    
-    subgraph "AI处理层"
-        E[TensorFlow.js] --> F[BlazePose 姿态检测]
-        E --> G[COCO-SSD 对象检测]
-        H[MediaPipe] --> I[手势检测]
-        H --> J[人像分割]
-    end
-    
-    subgraph "硬件加速层"
-        K[WebGL/WebGPU] --> L[实时视频处理]
-        K --> M[模型推理加速]
-    end
-    
-    subgraph "跨平台层"
-        N[Electron] --> O[桌面应用]
-        P[Capacitor] --> Q[移动应用]
-        R[PWA] --> S[Web应用]
-    end
-    
-    B --> E
-    C --> E
-    E --> K
-    H --> K
-    N --> A
-    P --> A
-    R --> A
-```
-
 ### 前端技术栈
 - **React 18** - 现代化UI框架
 - **TypeScript** - 类型安全的开发体验
@@ -159,42 +123,6 @@ graph TB
 
 ## 📁 项目结构
 
-### 目录结构图
-
-```mermaid
-graph TD
-    A[useflow/] --> B[src/]
-    A --> C[public/]
-    A --> D[main.js]
-    A --> E[capacitor.config.json]
-    A --> F[vite.config.ts]
-    
-    B --> G[components/]
-    B --> H[nodes/]
-    B --> I[flows/]
-    B --> J[edges/]
-    B --> K[App.tsx]
-    
-    G --> L[PoseDetector.tsx]
-    G --> M[ObjectDetector.tsx]
-    G --> N[BodySegmenter.tsx]
-    
-    H --> O[CameraInput.tsx]
-    H --> P[PoseDetection.tsx]
-    H --> Q[ObjectDetection.tsx]
-    
-    I --> R[UseFlow.tsx]
-    
-    C --> S[ssdlite_mobilenet_v2/]
-    C --> T[pose-detection-lib/]
-    
-    style A fill:#e3f2fd
-    style B fill:#f3e5f5
-    style C fill:#e8f5e8
-    style G fill:#fff3e0
-    style H fill:#fce4ec
-    style I fill:#f1f8e9
-```
 
 ### 详细目录结构
 
@@ -233,38 +161,6 @@ useflow/
 4. 配置各节点的参数，点击保存按钮保存流程
 
 ### 基础流程示例
-
-#### 人体姿态检测流程
-
-```mermaid
-flowchart LR
-    A[摄像头输入] --> B[姿势识别]
-    B --> C[姿势校验]
-    C --> D[视频渲染]
-    C --> E[日志记录]
-    
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style C fill:#e8f5e8
-    style D fill:#fff3e0
-    style E fill:#fce4ec
-```
-
-#### 对象检测与跟踪流程
-
-```mermaid
-flowchart LR
-    A[摄像头输入] --> B[对象识别]
-    B --> C[视频渲染]
-    B --> D[钉钉机器人]
-    B --> E[日志记录]
-    
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style C fill:#fff3e0
-    style D fill:#e8f5e8
-    style E fill:#fce4ec
-```
 
 #### 复杂AI处理流程
 
